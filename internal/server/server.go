@@ -44,11 +44,15 @@ func New(cfg *config.Config, log *slog.Logger, db *pgxpool.Pool) *Server {
 
 func (s *Server) registerModules() {
 	health.NewModule().RegisterRoutes(s.router)
-	user.NewModule(s.db).RegisterRoutes(s.router)
 
-	authRepo := auth.NewRepository(s.db)
-	authService := auth.NewService(authRepo, s.cfg.JWTSecret, s.cfg.JWTTTL)
-	auth.NewModule(authService, s.cfg.JWTSecret).RegisterRoutes(s.router)
+	v1 := s.router.Group("/api/v1")
+
+	authModule := auth.NewModule(s.db, s.cfg.JWTSecret, s.cfg.JWTTTL)
+	authModule.RegisterRoutes(v1)
+
+	protected := v1.Group("")
+	protected.Use(authModule.RequireAuth())
+	user.NewModule(s.db).RegisterRoutes(protected)
 }
 
 // Run starts the HTTP server and blocks until the context is cancelled or an error occurs.

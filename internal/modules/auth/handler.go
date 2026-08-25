@@ -4,10 +4,12 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/AshishDevashi/GIDP/internal/platform/token"
 	"github.com/AshishDevashi/GIDP/pkg/response"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Module wires the auth module's repository, service, and HTTP routes together.
@@ -16,12 +18,14 @@ type Module struct {
 	jwtSecret string
 }
 
-func NewModule(service *Service, jwtSecret string) *Module {
-	return &Module{service: service, jwtSecret: jwtSecret}
+func NewModule(pool *pgxpool.Pool, jwtSecret string, jwtTTL time.Duration) *Module {
+	repo := NewRepository(pool)
+	svc := NewService(repo, jwtSecret, jwtTTL)
+	return &Module{service: svc, jwtSecret: jwtSecret}
 }
 
-func (m *Module) RegisterRoutes(router *gin.Engine) {
-	group := router.Group("/api/auth")
+func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
+	group := rg.Group("/auth")
 	group.POST("/register", m.register)
 	group.POST("/login", m.login)
 	group.GET("/me", m.RequireAuth(), m.me)

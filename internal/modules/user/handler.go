@@ -3,9 +3,9 @@ package user
 import (
 	"net/http"
 
+	"github.com/AshishDevashi/GIDP/pkg/response"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/AshishDevashi/GIDP/pkg/response"
 )
 
 // Module wires the user module's repository, service, and HTTP routes together.
@@ -19,8 +19,8 @@ func NewModule(pool *pgxpool.Pool) *Module {
 	return &Module{service: svc}
 }
 
-func (m *Module) RegisterRoutes(router *gin.Engine) {
-	router.GET("/api/users", m.list)
+func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.GET("/users", m.list)
 }
 
 func (m *Module) list(c *gin.Context) {
