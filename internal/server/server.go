@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/wolf-platform/wolf-platform/internal/config"
 	"github.com/wolf-platform/wolf-platform/internal/modules/health"
@@ -18,18 +19,23 @@ type Server struct {
 	cfg    *config.Config
 	log    *slog.Logger
 	db     *pgxpool.Pool
-	router *http.ServeMux
+	router *gin.Engine
 }
 
 // New constructs a Server and registers all module routes.
 func New(cfg *config.Config, log *slog.Logger, db *pgxpool.Pool) *Server {
+	if cfg.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	s := &Server{
 		cfg:    cfg,
 		log:    log,
 		db:     db,
-		router: http.NewServeMux(),
+		router: gin.New(),
 	}
 
+	s.router.Use(gin.Recovery())
 	s.registerModules()
 
 	return s

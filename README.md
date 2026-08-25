@@ -27,6 +27,18 @@ make dev             # run with live reload via air
 make run
 ```
 
+## Running with Docker Compose
+
+Starts Postgres and the app together, app connects to Postgres via the `db` service hostname.
+
+```bash
+make up      # docker compose up -d --build
+make logs    # follow logs
+make down    # stop and remove containers
+```
+
+Postgres is also published on `localhost:5432` (user/pass/db: `postgres`/`postgres`/`wolf_platform`) so you can run the app locally with `make dev` against the same database.
+
 ## Adding a module
 
 1. Create `internal/modules/<name>/` with `handler.go`, `service.go`, `repository.go`.

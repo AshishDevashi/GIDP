@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/wolf-platform/wolf-platform/pkg/response"
 )
@@ -18,15 +19,15 @@ func NewModule(pool *pgxpool.Pool) *Module {
 	return &Module{service: svc}
 }
 
-func (m *Module) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/users", m.list)
+func (m *Module) RegisterRoutes(router *gin.Engine) {
+	router.GET("/api/users", m.list)
 }
 
-func (m *Module) list(w http.ResponseWriter, r *http.Request) {
-	users, err := m.service.List(r.Context())
+func (m *Module) list(c *gin.Context) {
+	users, err := m.service.List(c.Request.Context())
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response.JSON(w, http.StatusOK, users)
+	response.JSON(c, http.StatusOK, users)
 }

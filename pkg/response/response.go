@@ -1,18 +1,13 @@
 package response
 
-import (
-	"encoding/json"
-	"net/http"
-)
+import "github.com/gin-gonic/gin"
 
 // JSON writes v as a JSON response with the given status code.
-func JSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
+func JSON(c *gin.Context, status int, v any) {
+	c.JSON(status, v)
 }
 
 // Error writes a JSON error payload with the given status code.
-func Error(w http.ResponseWriter, status int, message string) {
-	JSON(w, status, map[string]string{"error": message})
+func Error(c *gin.Context, status int, message string) {
+	JSON(c, status, gin.H{"error": message})
 }
