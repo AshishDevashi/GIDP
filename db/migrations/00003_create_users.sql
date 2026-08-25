@@ -1,17 +1,5 @@
 -- +goose Up
-CREATE TABLE roles (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name       VARCHAR(50) UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE teams (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name       VARCHAR(150) UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username          VARCHAR(100) UNIQUE NOT NULL,
     email             VARCHAR(255) UNIQUE NOT NULL,
@@ -32,9 +20,5 @@ CREATE TABLE users (
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-INSERT INTO roles (name) VALUES ('admin'), ('manager'), ('developer');
-
 -- +goose Down
-DROP TABLE users;
-DROP TABLE teams;
-DROP TABLE roles;
+DROP TABLE IF EXISTS users;
