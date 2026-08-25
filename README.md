@@ -42,6 +42,14 @@ make down    # stop and remove containers
 
 Postgres is also published on `localhost:5432` (user/pass/db: `postgres`/`postgres`/`wolf_platform`) so you can run the app locally with `make dev` against the same database.
 
+## Auth
+
+- `POST /api/auth/register` — `{username, email, password, full_name?}`, assigns the default `developer` role, returns a JWT + user.
+- `POST /api/auth/login` — `{email, password}`, returns a fresh JWT + user.
+- `GET /api/auth/me` — requires `Authorization: Bearer <token>`, returns the authenticated user's profile.
+
+`JWT_SECRET` / `JWT_TTL` (see `.env.example`) configure token signing and expiry.
+
 ## Adding a module
 
 1. Create `internal/modules/<name>/` with `handler.go`, `service.go`, `repository.go`.

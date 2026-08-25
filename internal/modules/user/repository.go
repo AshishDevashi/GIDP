@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/AshishDevashi/GIDP/internal/store"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,7 +17,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{queries: store.New(pool)}
 }
 
-func (r *Repository) GetByID(ctx context.Context, id int64) (store.User, error) {
+func (r *Repository) GetByID(ctx context.Context, id pgtype.UUID) (store.User, error) {
 	return r.queries.GetUserByID(ctx, id)
 }
 

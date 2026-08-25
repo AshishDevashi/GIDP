@@ -8,9 +8,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type User struct {
-	ID        int64              `json:"id"`
+type Role struct {
+	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`
-	Email     string             `json:"email"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type Team struct {
+	ID        pgtype.UUID        `json:"id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type User struct {
+	ID           pgtype.UUID        `json:"id"`
+	Username     string             `json:"username"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"password_hash"`
+	FullName     pgtype.Text        `json:"full_name"`
+	AvatarUrl    pgtype.Text        `json:"avatar_url"`
+	TeamID       pgtype.UUID        `json:"team_id"`
+	ManagerID    pgtype.UUID        `json:"manager_id"`
+	RoleID       pgtype.UUID        `json:"role_id"`
+	IsActive     bool               `json:"is_active"`
+	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }

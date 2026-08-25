@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/AshishDevashi/GIDP/internal/config"
+	"github.com/AshishDevashi/GIDP/internal/modules/auth"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Server wires together the HTTP router and all registered modules.
@@ -44,6 +45,10 @@ func New(cfg *config.Config, log *slog.Logger, db *pgxpool.Pool) *Server {
 func (s *Server) registerModules() {
 	health.NewModule().RegisterRoutes(s.router)
 	user.NewModule(s.db).RegisterRoutes(s.router)
+
+	authRepo := auth.NewRepository(s.db)
+	authService := auth.NewService(authRepo, s.cfg.JWTSecret, s.cfg.JWTTTL)
+	auth.NewModule(authService, s.cfg.JWTSecret).RegisterRoutes(s.router)
 }
 
 // Run starts the HTTP server and blocks until the context is cancelled or an error occurs.

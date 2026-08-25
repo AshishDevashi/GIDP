@@ -6,13 +6,19 @@ package store
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteUser(ctx context.Context, id int64) error
-	GetUserByID(ctx context.Context, id int64) (User, error)
+	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	GetRoleByName(ctx context.Context, name string) (Role, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 }
 
 var _ Querier = (*Queries)(nil)

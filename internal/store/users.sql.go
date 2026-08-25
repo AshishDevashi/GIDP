@@ -7,27 +7,47 @@ package store
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (name, email)
-VALUES ($1, $2)
-RETURNING id, name, email, created_at
+INSERT INTO users (username, email, password_hash, full_name, role_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Username     string      `json:"username"`
+	Email        string      `json:"email"`
+	PasswordHash string      `json:"password_hash"`
+	FullName     pgtype.Text `json:"full_name"`
+	RoleID       pgtype.UUID `json:"role_id"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email)
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Username,
+		arg.Email,
+		arg.PasswordHash,
+		arg.FullName,
+		arg.RoleID,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.Username,
 		&i.Email,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.AvatarUrl,
+		&i.TeamID,
+		&i.ManagerID,
+		&i.RoleID,
+		&i.IsActive,
+		&i.LastLoginAt,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -37,32 +57,95 @@ DELETE FROM users
 WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.AvatarUrl,
+		&i.TeamID,
+		&i.ManagerID,
+		&i.RoleID,
+		&i.IsActive,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, email, created_at FROM users
+SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
 WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.Username,
 		&i.Email,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.AvatarUrl,
+		&i.TeamID,
+		&i.ManagerID,
+		&i.RoleID,
+		&i.IsActive,
+		&i.LastLoginAt,
 		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+WHERE username = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.AvatarUrl,
+		&i.TeamID,
+		&i.ManagerID,
+		&i.RoleID,
+		&i.IsActive,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, name, email, created_at FROM users
-ORDER BY id
+SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+ORDER BY created_at
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
@@ -76,9 +159,18 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
+			&i.Username,
 			&i.Email,
+			&i.PasswordHash,
+			&i.FullName,
+			&i.AvatarUrl,
+			&i.TeamID,
+			&i.ManagerID,
+			&i.RoleID,
+			&i.IsActive,
+			&i.LastLoginAt,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -88,4 +180,15 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateLastLogin = `-- name: UpdateLastLogin :exec
+UPDATE users
+SET last_login_at = now(), updated_at = now()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateLastLogin(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, updateLastLogin, id)
+	return err
 }
