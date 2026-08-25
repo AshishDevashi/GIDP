@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/wolf-platform/wolf-platform/internal/config"
-	"github.com/wolf-platform/wolf-platform/internal/platform/database"
-	"github.com/wolf-platform/wolf-platform/internal/platform/logger"
-	"github.com/wolf-platform/wolf-platform/internal/server"
+	"github.com/AshishDevashi/GIDP/internal/config"
+	"github.com/AshishDevashi/GIDP/internal/platform/database"
+	"github.com/AshishDevashi/GIDP/internal/platform/logger"
+	"github.com/AshishDevashi/GIDP/internal/server"
 )
 
 func main() {

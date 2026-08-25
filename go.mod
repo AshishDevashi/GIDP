@@ -1,4 +1,4 @@
-module github.com/wolf-platform/wolf-platform
+module github.com/AshishDevashi/GIDP
 
 go 1.26.3
 

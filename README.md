@@ -1,4 +1,4 @@
-# wolf-platform
+# GIDP (Golang Internal Developer Portal)
 
 Go modular monolith starter with live reload ([air](https://github.com/air-verse/air)) and type-safe SQL ([sqlc](https://sqlc.dev)).
 
@@ -8,9 +8,9 @@ Go modular monolith starter with live reload ([air](https://github.com/air-verse
 cmd/api/              entrypoint
 internal/config/      env-based configuration
 internal/platform/    shared infra (db, logger)
+internal/store/       sqlc-generated data access code (do not edit by hand)
 internal/server/      HTTP server wiring, mounts all modules
 internal/modules/     one folder per business module (health, user, ...)
-  user/db/            sqlc-generated code (do not edit by hand)
 db/migrations/        SQL schema migrations
 db/queries/           sqlc query definitions
 pkg/                  shared, reusable, framework-agnostic packages
@@ -22,10 +22,13 @@ pkg/                  shared, reusable, framework-agnostic packages
 cp .env.example .env
 make sqlc-generate   # generate DB access code from db/queries + db/migrations
 make tidy
+make migrate-up      # apply db/migrations to the database (requires goose)
 make dev             # run with live reload via air
 # or
 make run
 ```
+
+Migrations use [goose](https://github.com/pressly/goose). Tables (e.g. `users`) won't exist until `make migrate-up` has been run against the target database — run it once against localhost and again (or with `DB_URL` set) whenever you point at a different database.
 
 ## Running with Docker Compose
 

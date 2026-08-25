@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/wolf-platform/wolf-platform/pkg/response"
+	"github.com/AshishDevashi/GIDP/pkg/response"
 )
 
 // Module wires the user module's repository, service, and HTTP routes together.

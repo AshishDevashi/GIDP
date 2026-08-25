@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/wolf-platform/wolf-platform/internal/config"
-	"github.com/wolf-platform/wolf-platform/internal/modules/health"
-	"github.com/wolf-platform/wolf-platform/internal/modules/user"
+	"github.com/AshishDevashi/GIDP/internal/config"
+	"github.com/AshishDevashi/GIDP/internal/modules/health"
+	"github.com/AshishDevashi/GIDP/internal/modules/user"
 )
 
 // Server wires together the HTTP router and all registered modules.
