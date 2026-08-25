@@ -1,0 +1,28 @@
+# Binaries and build output
+/tmp/
+/bin/
+main
+wolf-platform
+
+# Air
+build-errors.log
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
