@@ -11,13 +11,21 @@ import (
 )
 
 type Querier interface {
+	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
+	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetRoleByName(ctx context.Context, name string) (Role, error)
+	GetTeamByID(ctx context.Context, id pgtype.UUID) (Team, error)
+	GetTeamBySlug(ctx context.Context, slug string) (Team, error)
+	GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (TeamMember, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]TeamMember, error)
+	ListTeams(ctx context.Context) ([]Team, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	RemoveTeamMember(ctx context.Context, arg RemoveTeamMemberParams) error
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 }
 

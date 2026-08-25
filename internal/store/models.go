@@ -15,9 +15,21 @@ type Role struct {
 }
 
 type Team struct {
-	ID        pgtype.UUID        `json:"id"`
-	Name      string             `json:"name"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID          pgtype.UUID        `json:"id"`
+	Name        string             `json:"name"`
+	Slug        string             `json:"slug"`
+	Description pgtype.Text        `json:"description"`
+	IsActive    bool               `json:"is_active"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type TeamMember struct {
+	TeamID     pgtype.UUID        `json:"team_id"`
+	UserID     pgtype.UUID        `json:"user_id"`
+	RoleInTeam string             `json:"role_in_team"`
+	JoinedAt   pgtype.Timestamptz `json:"joined_at"`
+	LeftAt     pgtype.Timestamptz `json:"left_at"`
 }
 
 type User struct {
