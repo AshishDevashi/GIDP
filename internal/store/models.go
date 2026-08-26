@@ -8,6 +8,28 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Deployment struct {
+	ID                         pgtype.UUID        `json:"id"`
+	ServiceID                  pgtype.UUID        `json:"service_id"`
+	Environment                string             `json:"environment"`
+	ImageTag                   string             `json:"image_tag"`
+	PreviousImageTag           pgtype.Text        `json:"previous_image_tag"`
+	GitCommitSha               pgtype.Text        `json:"git_commit_sha"`
+	GitBranch                  pgtype.Text        `json:"git_branch"`
+	TriggeredByUserID          pgtype.UUID        `json:"triggered_by_user_id"`
+	TriggerType                string             `json:"trigger_type"`
+	CiRunUrl                   pgtype.Text        `json:"ci_run_url"`
+	DeployStrategy             string             `json:"deploy_strategy"`
+	GitopsCommitSha            pgtype.Text        `json:"gitops_commit_sha"`
+	Status                     string             `json:"status"`
+	StartedAt                  pgtype.Timestamptz `json:"started_at"`
+	CompletedAt                pgtype.Timestamptz `json:"completed_at"`
+	FailureReason              pgtype.Text        `json:"failure_reason"`
+	IsRollback                 bool               `json:"is_rollback"`
+	RolledBackFromDeploymentID pgtype.UUID        `json:"rolled_back_from_deployment_id"`
+	CreatedAt                  pgtype.Timestamptz `json:"created_at"`
+}
+
 type Language struct {
 	ID    int16       `json:"id"`
 	Code  string      `json:"code"`

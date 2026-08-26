@@ -9,6 +9,7 @@ import (
 
 	"github.com/AshishDevashi/GIDP/internal/config"
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
+	"github.com/AshishDevashi/GIDP/internal/modules/deployment"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
 	"github.com/AshishDevashi/GIDP/internal/modules/project"
@@ -60,6 +61,7 @@ func (s *Server) registerModules() {
 	team.NewModule(s.db).RegisterRoutes(protected)
 	project.NewModule(s.db).RegisterRoutes(protected)
 	service.NewModule(s.db).RegisterRoutes(protected)
+	deployment.NewModule(s.db).RegisterRoutes(protected)
 	lookup.NewModule(s.db).RegisterRoutes(protected)
 }
 

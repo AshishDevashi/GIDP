@@ -17,12 +17,16 @@ type Querier interface {
 	AddServiceEnvironment(ctx context.Context, arg AddServiceEnvironmentParams) (ServiceEnvironment, error)
 	AddServiceTag(ctx context.Context, arg AddServiceTagParams) error
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
+	CreateDeployment(ctx context.Context, arg CreateDeploymentParams) (Deployment, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
+	// Latest successful deployment for a service+environment, i.e. what's actually running.
+	GetCurrentDeployment(ctx context.Context, arg GetCurrentDeploymentParams) (Deployment, error)
+	GetDeploymentByID(ctx context.Context, id pgtype.UUID) (Deployment, error)
 	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
 	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
@@ -41,6 +45,8 @@ type Querier interface {
 	ListDependentProjects(ctx context.Context, dependsOnProjectID pgtype.UUID) ([]ProjectDependency, error)
 	// Services that depend on the given service (impact check before deletion).
 	ListDependentServices(ctx context.Context, dependsOnServiceID pgtype.UUID) ([]ServiceDependency, error)
+	ListDeploymentsByService(ctx context.Context, serviceID pgtype.UUID) ([]Deployment, error)
+	ListDeploymentsByServiceEnvironment(ctx context.Context, arg ListDeploymentsByServiceEnvironmentParams) ([]Deployment, error)
 	ListLanguages(ctx context.Context) ([]Language, error)
 	ListLifecycles(ctx context.Context) ([]Lifecycle, error)
 	// Projects that the given project depends on.
@@ -65,6 +71,8 @@ type Querier interface {
 	RemoveServiceTag(ctx context.Context, arg RemoveServiceTagParams) error
 	RemoveTeamMember(ctx context.Context, id pgtype.UUID) error
 	UnlinkProjectService(ctx context.Context, arg UnlinkProjectServiceParams) error
+	// The only mutation ever allowed on a deployment row after creation.
+	UpdateDeploymentStatus(ctx context.Context, arg UpdateDeploymentStatusParams) (Deployment, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 }
 
