@@ -26,7 +26,7 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	deployments.GET("/:id", m.getByID)
 	deployments.PATCH("/:id/status", m.updateStatus)
 
-	serviceDeployments := rg.Group("/services/:serviceId/deployments")
+	serviceDeployments := rg.Group("/services/:id/deployments")
 	serviceDeployments.GET("", m.listByService)
 	serviceDeployments.GET("/current", m.current)
 }
@@ -74,7 +74,7 @@ func (m *Module) updateStatus(c *gin.Context) {
 }
 
 func (m *Module) listByService(c *gin.Context) {
-	deps, err := m.service.ListByService(c.Request.Context(), c.Param("serviceId"), c.Query("environment"))
+	deps, err := m.service.ListByService(c.Request.Context(), c.Param("id"), c.Query("environment"))
 	if err != nil {
 		m.respondServiceError(c, err)
 		return
@@ -91,7 +91,7 @@ func (m *Module) current(c *gin.Context) {
 		return
 	}
 
-	dep, err := m.service.Current(c.Request.Context(), c.Param("serviceId"), environment)
+	dep, err := m.service.Current(c.Request.Context(), c.Param("id"), environment)
 	if err != nil {
 		m.respondServiceError(c, err)
 		return

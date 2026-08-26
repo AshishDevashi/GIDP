@@ -24,7 +24,7 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	projects := rg.Group("/projects")
 	projects.POST("", m.create)
 	projects.GET("", m.list)
-	projects.GET("/:slug", m.getBySlug)
+	projects.GET("/:id", m.getBySlug)
 	projects.POST("/:id/environments", m.addEnvironment)
 	projects.GET("/:id/environments", m.listEnvironments)
 	projects.POST("/:id/services", m.linkService)
@@ -63,7 +63,7 @@ func (m *Module) list(c *gin.Context) {
 }
 
 func (m *Module) getBySlug(c *gin.Context) {
-	proj, err := m.service.GetBySlug(c.Request.Context(), c.Param("slug"))
+	proj, err := m.service.GetBySlug(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		m.respondServiceError(c, err)
 		return

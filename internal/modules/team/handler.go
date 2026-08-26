@@ -24,7 +24,7 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	teams := rg.Group("/teams")
 	teams.POST("", m.create)
 	teams.GET("", m.list)
-	teams.GET("/:slug", m.getBySlug)
+	teams.GET("/:id", m.getBySlug)
 	teams.POST("/:id/members", m.addMember)
 	teams.GET("/:id/members", m.listMembers)
 	teams.DELETE("/:id/members/:userId", m.removeMember)
@@ -57,7 +57,7 @@ func (m *Module) list(c *gin.Context) {
 }
 
 func (m *Module) getBySlug(c *gin.Context) {
-	team, err := m.service.GetBySlug(c.Request.Context(), c.Param("slug"))
+	team, err := m.service.GetBySlug(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		m.respondServiceError(c, err)
 		return

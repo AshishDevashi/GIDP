@@ -65,6 +65,11 @@ func (s *Server) registerModules() {
 	lookup.NewModule(s.db).RegisterRoutes(protected)
 }
 
+// Router exposes the underlying gin engine, e.g. for route introspection tooling.
+func (s *Server) Router() *gin.Engine {
+	return s.router
+}
+
 // Run starts the HTTP server and blocks until the context is cancelled or an error occurs.
 func (s *Server) Run(ctx context.Context) error {
 	httpServer := &http.Server{
