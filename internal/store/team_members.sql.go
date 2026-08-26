@@ -12,56 +12,70 @@ import (
 )
 
 const addTeamMember = `-- name: AddTeamMember :one
-INSERT INTO team_members (team_id, user_id, role_in_team)
-VALUES ($1, $2, $3)
-RETURNING team_id, user_id, role_in_team, joined_at, left_at
+INSERT INTO team_members (team_id, user_id, role_in_team, is_primary)
+VALUES ($1, $2, $3, $4)
+RETURNING id, team_id, user_id, role_in_team, is_primary, joined_at, left_at, created_at, updated_at
 `
 
 type AddTeamMemberParams struct {
 	TeamID     pgtype.UUID `json:"team_id"`
 	UserID     pgtype.UUID `json:"user_id"`
 	RoleInTeam string      `json:"role_in_team"`
+	IsPrimary  bool        `json:"is_primary"`
 }
 
 func (q *Queries) AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error) {
-	row := q.db.QueryRow(ctx, addTeamMember, arg.TeamID, arg.UserID, arg.RoleInTeam)
+	row := q.db.QueryRow(ctx, addTeamMember,
+		arg.TeamID,
+		arg.UserID,
+		arg.RoleInTeam,
+		arg.IsPrimary,
+	)
 	var i TeamMember
 	err := row.Scan(
+		&i.ID,
 		&i.TeamID,
 		&i.UserID,
 		&i.RoleInTeam,
+		&i.IsPrimary,
 		&i.JoinedAt,
 		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const getTeamMember = `-- name: GetTeamMember :one
-SELECT team_id, user_id, role_in_team, joined_at, left_at FROM team_members
-WHERE team_id = $1 AND user_id = $2
+const getActiveTeamMember = `-- name: GetActiveTeamMember :one
+SELECT id, team_id, user_id, role_in_team, is_primary, joined_at, left_at, created_at, updated_at FROM team_members
+WHERE team_id = $1 AND user_id = $2 AND left_at IS NULL
 LIMIT 1
 `
 
-type GetTeamMemberParams struct {
+type GetActiveTeamMemberParams struct {
 	TeamID pgtype.UUID `json:"team_id"`
 	UserID pgtype.UUID `json:"user_id"`
 }
 
-func (q *Queries) GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (TeamMember, error) {
-	row := q.db.QueryRow(ctx, getTeamMember, arg.TeamID, arg.UserID)
+func (q *Queries) GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error) {
+	row := q.db.QueryRow(ctx, getActiveTeamMember, arg.TeamID, arg.UserID)
 	var i TeamMember
 	err := row.Scan(
+		&i.ID,
 		&i.TeamID,
 		&i.UserID,
 		&i.RoleInTeam,
+		&i.IsPrimary,
 		&i.JoinedAt,
 		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const listTeamMembers = `-- name: ListTeamMembers :many
-SELECT team_id, user_id, role_in_team, joined_at, left_at FROM team_members
+SELECT id, team_id, user_id, role_in_team, is_primary, joined_at, left_at, created_at, updated_at FROM team_members
 WHERE team_id = $1 AND left_at IS NULL
 ORDER BY joined_at
 `
@@ -76,11 +90,15 @@ func (q *Queries) ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]Te
 	for rows.Next() {
 		var i TeamMember
 		if err := rows.Scan(
+			&i.ID,
 			&i.TeamID,
 			&i.UserID,
 			&i.RoleInTeam,
+			&i.IsPrimary,
 			&i.JoinedAt,
 			&i.LeftAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -94,16 +112,11 @@ func (q *Queries) ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]Te
 
 const removeTeamMember = `-- name: RemoveTeamMember :exec
 UPDATE team_members
-SET left_at = now()
-WHERE team_id = $1 AND user_id = $2
+SET left_at = now(), updated_at = now()
+WHERE id = $1
 `
 
-type RemoveTeamMemberParams struct {
-	TeamID pgtype.UUID `json:"team_id"`
-	UserID pgtype.UUID `json:"user_id"`
-}
-
-func (q *Queries) RemoveTeamMember(ctx context.Context, arg RemoveTeamMemberParams) error {
-	_, err := q.db.Exec(ctx, removeTeamMember, arg.TeamID, arg.UserID)
+func (q *Queries) RemoveTeamMember(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, removeTeamMember, id)
 	return err
 }

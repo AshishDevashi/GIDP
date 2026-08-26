@@ -11,31 +11,37 @@ import (
 )
 
 type Querier interface {
+	AddProjectDependency(ctx context.Context, arg AddProjectDependencyParams) (ProjectDependency, error)
 	AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) (ProjectEnvironment, error)
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
 	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
 	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetTeamByID(ctx context.Context, id pgtype.UUID) (Team, error)
 	GetTeamBySlug(ctx context.Context, slug string) (Team, error)
-	GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (TeamMember, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	LinkProjectService(ctx context.Context, arg LinkProjectServiceParams) error
 	ListChildProjects(ctx context.Context, parentProjectID pgtype.UUID) ([]Project, error)
+	// Projects that depend on the given project (impact check before deletion).
+	ListDependentProjects(ctx context.Context, dependsOnProjectID pgtype.UUID) ([]ProjectDependency, error)
+	// Projects that the given project depends on.
+	ListProjectDependencies(ctx context.Context, projectID pgtype.UUID) ([]ProjectDependency, error)
 	ListProjectEnvironments(ctx context.Context, projectID pgtype.UUID) ([]ProjectEnvironment, error)
 	ListProjectServices(ctx context.Context, projectID pgtype.UUID) ([]ProjectService, error)
 	ListProjects(ctx context.Context) ([]Project, error)
 	ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]TeamMember, error)
 	ListTeams(ctx context.Context) ([]Team, error)
 	ListUsers(ctx context.Context) ([]User, error)
-	RemoveTeamMember(ctx context.Context, arg RemoveTeamMemberParams) error
+	RemoveProjectDependency(ctx context.Context, arg RemoveProjectDependencyParams) error
+	RemoveTeamMember(ctx context.Context, id pgtype.UUID) error
 	UnlinkProjectService(ctx context.Context, arg UnlinkProjectServiceParams) error
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 }

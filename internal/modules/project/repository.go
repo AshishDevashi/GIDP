@@ -60,3 +60,22 @@ func (r *Repository) UnlinkService(ctx context.Context, projectID, serviceID pgt
 func (r *Repository) ListServices(ctx context.Context, projectID pgtype.UUID) ([]store.ProjectService, error) {
 	return r.queries.ListProjectServices(ctx, projectID)
 }
+
+func (r *Repository) AddDependency(ctx context.Context, arg store.AddProjectDependencyParams) (store.ProjectDependency, error) {
+	return r.queries.AddProjectDependency(ctx, arg)
+}
+
+func (r *Repository) ListDependencies(ctx context.Context, projectID pgtype.UUID) ([]store.ProjectDependency, error) {
+	return r.queries.ListProjectDependencies(ctx, projectID)
+}
+
+func (r *Repository) ListDependents(ctx context.Context, projectID pgtype.UUID) ([]store.ProjectDependency, error) {
+	return r.queries.ListDependentProjects(ctx, projectID)
+}
+
+func (r *Repository) RemoveDependency(ctx context.Context, projectID, dependsOnProjectID pgtype.UUID) error {
+	return r.queries.RemoveProjectDependency(ctx, store.RemoveProjectDependencyParams{
+		ProjectID:          projectID,
+		DependsOnProjectID: dependsOnProjectID,
+	})
+}

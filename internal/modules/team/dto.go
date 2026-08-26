@@ -11,6 +11,7 @@ type CreateTeamRequest struct {
 type AddMemberRequest struct {
 	UserID     string `json:"user_id" binding:"required,uuid"`
 	RoleInTeam string `json:"role_in_team"`
+	IsPrimary  bool   `json:"is_primary"`
 }
 
 // Response is the public representation of a team.
@@ -24,8 +25,10 @@ type Response struct {
 
 // MemberResponse is the public representation of a team membership.
 type MemberResponse struct {
+	ID         string  `json:"id"`
 	TeamID     string  `json:"team_id"`
 	UserID     string  `json:"user_id"`
 	RoleInTeam string  `json:"role_in_team"`
+	IsPrimary  bool    `json:"is_primary"`
 	LeftAt     *string `json:"left_at,omitempty"`
 }

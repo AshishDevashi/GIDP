@@ -35,6 +35,14 @@ type Project struct {
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 }
 
+type ProjectDependency struct {
+	ID                 pgtype.UUID        `json:"id"`
+	ProjectID          pgtype.UUID        `json:"project_id"`
+	DependsOnProjectID pgtype.UUID        `json:"depends_on_project_id"`
+	DependencyType     string             `json:"dependency_type"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+}
+
 type ProjectEnvironment struct {
 	ID          pgtype.UUID `json:"id"`
 	ProjectID   pgtype.UUID `json:"project_id"`
@@ -75,11 +83,15 @@ type Team struct {
 }
 
 type TeamMember struct {
+	ID         pgtype.UUID        `json:"id"`
 	TeamID     pgtype.UUID        `json:"team_id"`
 	UserID     pgtype.UUID        `json:"user_id"`
 	RoleInTeam string             `json:"role_in_team"`
+	IsPrimary  bool               `json:"is_primary"`
 	JoinedAt   pgtype.Timestamptz `json:"joined_at"`
 	LeftAt     pgtype.Timestamptz `json:"left_at"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
 type User struct {
@@ -89,7 +101,6 @@ type User struct {
 	PasswordHash string             `json:"password_hash"`
 	FullName     pgtype.Text        `json:"full_name"`
 	AvatarUrl    pgtype.Text        `json:"avatar_url"`
-	TeamID       pgtype.UUID        `json:"team_id"`
 	ManagerID    pgtype.UUID        `json:"manager_id"`
 	RoleID       pgtype.UUID        `json:"role_id"`
 	IsActive     bool               `json:"is_active"`

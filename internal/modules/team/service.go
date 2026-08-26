@@ -87,6 +87,7 @@ func (s *Service) AddMember(ctx context.Context, teamID string, req AddMemberReq
 		TeamID:     tID,
 		UserID:     uID,
 		RoleInTeam: roleInTeam,
+		IsPrimary:  req.IsPrimary,
 	})
 	if err != nil {
 		return MemberResponse{}, err
@@ -123,14 +124,15 @@ func (s *Service) RemoveMember(ctx context.Context, teamID, userID string) error
 		return ErrInvalidID
 	}
 
-	if _, err := s.repo.GetMember(ctx, tID, uID); err != nil {
+	member, err := s.repo.GetActiveMember(ctx, tID, uID)
+	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
 		return err
 	}
 
-	return s.repo.RemoveMember(ctx, tID, uID)
+	return s.repo.RemoveMember(ctx, member.ID)
 }
 
 func toResponse(t store.Team) Response {
@@ -145,9 +147,11 @@ func toResponse(t store.Team) Response {
 
 func toMemberResponse(m store.TeamMember) MemberResponse {
 	resp := MemberResponse{
+		ID:         uuidutil.String(m.ID),
 		TeamID:     uuidutil.String(m.TeamID),
 		UserID:     uuidutil.String(m.UserID),
 		RoleInTeam: m.RoleInTeam,
+		IsPrimary:  m.IsPrimary,
 	}
 	if m.LeftAt.Valid {
 		left := m.LeftAt.Time.String()

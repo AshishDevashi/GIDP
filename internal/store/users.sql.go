@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, email, password_hash, full_name, role_id)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at
+RETURNING id, username, email, password_hash, full_name, avatar_url, manager_id, role_id, is_active, last_login_at, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -41,7 +41,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.PasswordHash,
 		&i.FullName,
 		&i.AvatarUrl,
-		&i.TeamID,
 		&i.ManagerID,
 		&i.RoleID,
 		&i.IsActive,
@@ -63,7 +62,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, full_name, avatar_url, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
 WHERE email = $1
 LIMIT 1
 `
@@ -78,7 +77,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.PasswordHash,
 		&i.FullName,
 		&i.AvatarUrl,
-		&i.TeamID,
 		&i.ManagerID,
 		&i.RoleID,
 		&i.IsActive,
@@ -90,7 +88,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, full_name, avatar_url, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
 WHERE id = $1
 LIMIT 1
 `
@@ -105,7 +103,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.PasswordHash,
 		&i.FullName,
 		&i.AvatarUrl,
-		&i.TeamID,
 		&i.ManagerID,
 		&i.RoleID,
 		&i.IsActive,
@@ -117,7 +114,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, full_name, avatar_url, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
 WHERE username = $1
 LIMIT 1
 `
@@ -132,7 +129,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.PasswordHash,
 		&i.FullName,
 		&i.AvatarUrl,
-		&i.TeamID,
 		&i.ManagerID,
 		&i.RoleID,
 		&i.IsActive,
@@ -144,7 +140,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, email, password_hash, full_name, avatar_url, team_id, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
+SELECT id, username, email, password_hash, full_name, avatar_url, manager_id, role_id, is_active, last_login_at, created_at, updated_at FROM users
 ORDER BY created_at
 `
 
@@ -164,7 +160,6 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.PasswordHash,
 			&i.FullName,
 			&i.AvatarUrl,
-			&i.TeamID,
 			&i.ManagerID,
 			&i.RoleID,
 			&i.IsActive,

@@ -30,6 +30,10 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	projects.POST("/:id/services", m.linkService)
 	projects.GET("/:id/services", m.listServices)
 	projects.DELETE("/:id/services/:serviceId", m.unlinkService)
+	projects.POST("/:id/dependencies", m.addDependency)
+	projects.GET("/:id/dependencies", m.listDependencies)
+	projects.GET("/:id/dependents", m.listDependents)
+	projects.DELETE("/:id/dependencies/:dependsOnId", m.removeDependency)
 }
 
 func (m *Module) create(c *gin.Context) {
@@ -121,6 +125,52 @@ func (m *Module) listServices(c *gin.Context) {
 
 func (m *Module) unlinkService(c *gin.Context) {
 	if err := m.service.UnlinkService(c.Request.Context(), c.Param("id"), c.Param("serviceId")); err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (m *Module) addDependency(c *gin.Context) {
+	var req AddDependencyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	dep, err := m.service.AddDependency(c.Request.Context(), c.Param("id"), req)
+	if err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	response.JSON(c, http.StatusCreated, dep)
+}
+
+func (m *Module) listDependencies(c *gin.Context) {
+	deps, err := m.service.ListDependencies(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	response.JSON(c, http.StatusOK, deps)
+}
+
+// listDependents shows what would be affected if this project were deleted.
+func (m *Module) listDependents(c *gin.Context) {
+	deps, err := m.service.ListDependents(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	response.JSON(c, http.StatusOK, deps)
+}
+
+func (m *Module) removeDependency(c *gin.Context) {
+	if err := m.service.RemoveDependency(c.Request.Context(), c.Param("id"), c.Param("dependsOnId")); err != nil {
 		m.respondServiceError(c, err)
 		return
 	}

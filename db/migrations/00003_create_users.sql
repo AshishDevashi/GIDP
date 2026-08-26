@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url        TEXT,
 
     -- Org structure
-    team_id           UUID REFERENCES teams(id),
     manager_id        UUID REFERENCES users(id),
     role_id           UUID NOT NULL REFERENCES roles(id),
 

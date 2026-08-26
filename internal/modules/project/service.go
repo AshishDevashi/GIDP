@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	DefaultProjectType   = "service"
-	DefaultLifecycle     = "production"
-	DefaultDefaultBranch = "main"
+	DefaultProjectType    = "service"
+	DefaultLifecycle      = "production"
+	DefaultDefaultBranch  = "main"
+	DefaultDependencyType = "runtime"
 )
 
 var (
@@ -206,6 +207,83 @@ func (s *Service) ListServiceIDs(ctx context.Context, projectID string) ([]strin
 	return ids, nil
 }
 
+// AddDependency records that projectID depends on req.DependsOnProjectID.
+func (s *Service) AddDependency(ctx context.Context, projectID string, req AddDependencyRequest) (DependencyResponse, error) {
+	pID, err := uuidutil.Parse(projectID)
+	if err != nil {
+		return DependencyResponse{}, ErrInvalidID
+	}
+	dependsOnID, err := uuidutil.Parse(req.DependsOnProjectID)
+	if err != nil {
+		return DependencyResponse{}, ErrInvalidID
+	}
+
+	dependencyType := defaultString(req.DependencyType, DefaultDependencyType)
+
+	dep, err := s.repo.AddDependency(ctx, store.AddProjectDependencyParams{
+		ProjectID:          pID,
+		DependsOnProjectID: dependsOnID,
+		DependencyType:     dependencyType,
+	})
+	if err != nil {
+		return DependencyResponse{}, err
+	}
+
+	return toDependencyResponse(dep), nil
+}
+
+// ListDependencies returns the projects that projectID depends on.
+func (s *Service) ListDependencies(ctx context.Context, projectID string) ([]DependencyResponse, error) {
+	pID, err := uuidutil.Parse(projectID)
+	if err != nil {
+		return nil, ErrInvalidID
+	}
+
+	deps, err := s.repo.ListDependencies(ctx, pID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]DependencyResponse, len(deps))
+	for i, d := range deps {
+		resp[i] = toDependencyResponse(d)
+	}
+	return resp, nil
+}
+
+// ListDependents returns the projects that depend on projectID — the impact list to show
+// before deleting it.
+func (s *Service) ListDependents(ctx context.Context, projectID string) ([]DependencyResponse, error) {
+	pID, err := uuidutil.Parse(projectID)
+	if err != nil {
+		return nil, ErrInvalidID
+	}
+
+	deps, err := s.repo.ListDependents(ctx, pID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]DependencyResponse, len(deps))
+	for i, d := range deps {
+		resp[i] = toDependencyResponse(d)
+	}
+	return resp, nil
+}
+
+func (s *Service) RemoveDependency(ctx context.Context, projectID, dependsOnProjectID string) error {
+	pID, err := uuidutil.Parse(projectID)
+	if err != nil {
+		return ErrInvalidID
+	}
+	dependsOnID, err := uuidutil.Parse(dependsOnProjectID)
+	if err != nil {
+		return ErrInvalidID
+	}
+
+	return s.repo.RemoveDependency(ctx, pID, dependsOnID)
+}
+
 func optionalUUID(s string) (pgtype.UUID, error) {
 	if s == "" {
 		return pgtype.UUID{}, nil
@@ -256,5 +334,14 @@ func toEnvironmentResponse(e store.ProjectEnvironment) EnvironmentResponse {
 		Namespace:   pgtext.To(e.Namespace),
 		URL:         pgtext.To(e.Url),
 		Replicas:    e.Replicas,
+	}
+}
+
+func toDependencyResponse(d store.ProjectDependency) DependencyResponse {
+	return DependencyResponse{
+		ID:                 uuidutil.String(d.ID),
+		ProjectID:          uuidutil.String(d.ProjectID),
+		DependsOnProjectID: uuidutil.String(d.DependsOnProjectID),
+		DependencyType:     d.DependencyType,
 	}
 }

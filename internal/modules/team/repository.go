@@ -41,10 +41,10 @@ func (r *Repository) ListMembers(ctx context.Context, teamID pgtype.UUID) ([]sto
 	return r.queries.ListTeamMembers(ctx, teamID)
 }
 
-func (r *Repository) GetMember(ctx context.Context, teamID, userID pgtype.UUID) (store.TeamMember, error) {
-	return r.queries.GetTeamMember(ctx, store.GetTeamMemberParams{TeamID: teamID, UserID: userID})
+func (r *Repository) GetActiveMember(ctx context.Context, teamID, userID pgtype.UUID) (store.TeamMember, error) {
+	return r.queries.GetActiveTeamMember(ctx, store.GetActiveTeamMemberParams{TeamID: teamID, UserID: userID})
 }
 
-func (r *Repository) RemoveMember(ctx context.Context, teamID, userID pgtype.UUID) error {
-	return r.queries.RemoveTeamMember(ctx, store.RemoveTeamMemberParams{TeamID: teamID, UserID: userID})
+func (r *Repository) RemoveMember(ctx context.Context, id pgtype.UUID) error {
+	return r.queries.RemoveTeamMember(ctx, id)
 }

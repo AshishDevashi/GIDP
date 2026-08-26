@@ -44,6 +44,20 @@ type LinkServiceRequest struct {
 	ServiceID string `json:"service_id" binding:"required,uuid"`
 }
 
+// AddDependencyRequest is the payload for declaring that a project depends on another project.
+type AddDependencyRequest struct {
+	DependsOnProjectID string `json:"depends_on_project_id" binding:"required,uuid"`
+	DependencyType     string `json:"dependency_type"`
+}
+
+// DependencyResponse is the public representation of a project dependency edge.
+type DependencyResponse struct {
+	ID                 string `json:"id"`
+	ProjectID          string `json:"project_id"`
+	DependsOnProjectID string `json:"depends_on_project_id"`
+	DependencyType     string `json:"dependency_type"`
+}
+
 // Response is the public representation of a project.
 type Response struct {
 	ID              string `json:"id"`
