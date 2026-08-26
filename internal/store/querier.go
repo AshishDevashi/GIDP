@@ -11,10 +11,15 @@ import (
 )
 
 type Querier interface {
+	AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) (ProjectEnvironment, error)
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
+	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
+	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
+	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetTeamByID(ctx context.Context, id pgtype.UUID) (Team, error)
 	GetTeamBySlug(ctx context.Context, slug string) (Team, error)
@@ -22,10 +27,16 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	LinkProjectService(ctx context.Context, arg LinkProjectServiceParams) error
+	ListChildProjects(ctx context.Context, parentProjectID pgtype.UUID) ([]Project, error)
+	ListProjectEnvironments(ctx context.Context, projectID pgtype.UUID) ([]ProjectEnvironment, error)
+	ListProjectServices(ctx context.Context, projectID pgtype.UUID) ([]ProjectService, error)
+	ListProjects(ctx context.Context) ([]Project, error)
 	ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]TeamMember, error)
 	ListTeams(ctx context.Context) ([]Team, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	RemoveTeamMember(ctx context.Context, arg RemoveTeamMemberParams) error
+	UnlinkProjectService(ctx context.Context, arg UnlinkProjectServiceParams) error
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 }
 

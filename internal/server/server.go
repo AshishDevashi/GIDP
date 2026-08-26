@@ -10,6 +10,7 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/config"
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
+	"github.com/AshishDevashi/GIDP/internal/modules/project"
 	"github.com/AshishDevashi/GIDP/internal/modules/team"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
 	"github.com/gin-gonic/gin"
@@ -55,6 +56,7 @@ func (s *Server) registerModules() {
 	protected.Use(authModule.RequireAuth())
 	user.NewModule(s.db).RegisterRoutes(protected)
 	team.NewModule(s.db).RegisterRoutes(protected)
+	project.NewModule(s.db).RegisterRoutes(protected)
 }
 
 // Run starts the HTTP server and blocks until the context is cancelled or an error occurs.

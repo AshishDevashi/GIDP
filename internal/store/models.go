@@ -8,10 +8,60 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Project struct {
+	ID              pgtype.UUID        `json:"id"`
+	Name            string             `json:"name"`
+	Slug            string             `json:"slug"`
+	Description     pgtype.Text        `json:"description"`
+	ProjectType     string             `json:"project_type"`
+	Architecture    pgtype.Text        `json:"architecture"`
+	OwnerTeamID     pgtype.UUID        `json:"owner_team_id"`
+	TechLeadID      pgtype.UUID        `json:"tech_lead_id"`
+	RepoUrl         pgtype.Text        `json:"repo_url"`
+	RepoProvider    pgtype.Text        `json:"repo_provider"`
+	DefaultBranch   string             `json:"default_branch"`
+	CiPipelineUrl   pgtype.Text        `json:"ci_pipeline_url"`
+	GitopsPath      pgtype.Text        `json:"gitops_path"`
+	Lifecycle       string             `json:"lifecycle"`
+	Tier            pgtype.Text        `json:"tier"`
+	Language        pgtype.Text        `json:"language"`
+	Framework       pgtype.Text        `json:"framework"`
+	DocsUrl         pgtype.Text        `json:"docs_url"`
+	DashboardUrl    pgtype.Text        `json:"dashboard_url"`
+	RunbookUrl      pgtype.Text        `json:"runbook_url"`
+	ParentProjectID pgtype.UUID        `json:"parent_project_id"`
+	IsActive        bool               `json:"is_active"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ProjectEnvironment struct {
+	ID          pgtype.UUID `json:"id"`
+	ProjectID   pgtype.UUID `json:"project_id"`
+	Environment string      `json:"environment"`
+	ClusterName pgtype.Text `json:"cluster_name"`
+	Namespace   pgtype.Text `json:"namespace"`
+	Url         pgtype.Text `json:"url"`
+	Replicas    int32       `json:"replicas"`
+}
+
+type ProjectService struct {
+	ProjectID pgtype.UUID `json:"project_id"`
+	ServiceID pgtype.UUID `json:"service_id"`
+}
+
 type Role struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type Service struct {
+	ID        pgtype.UUID        `json:"id"`
+	Name      string             `json:"name"`
+	Slug      string             `json:"slug"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Team struct {
