@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/AshishDevashi/GIDP/internal/platform/pgnum"
 	"github.com/AshishDevashi/GIDP/internal/platform/pgtext"
 	"github.com/AshishDevashi/GIDP/internal/platform/uuidutil"
 	"github.com/AshishDevashi/GIDP/internal/store"
@@ -13,8 +14,7 @@ import (
 
 const (
 	DefaultProjectType    = "service"
-	DefaultLifecycle      = "production"
-	DefaultDefaultBranch  = "main"
+	DefaultLifecycleID    = 2 // 'production', seeded in lookup tables migration
 	DefaultDependencyType = "runtime"
 )
 
@@ -57,8 +57,10 @@ func (s *Service) Create(ctx context.Context, req CreateProjectRequest) (Respons
 	}
 
 	projectType := defaultString(req.ProjectType, DefaultProjectType)
-	lifecycle := defaultString(req.Lifecycle, DefaultLifecycle)
-	defaultBranch := defaultString(req.DefaultBranch, DefaultDefaultBranch)
+	lifecycleID := req.LifecycleID
+	if lifecycleID == 0 {
+		lifecycleID = DefaultLifecycleID
+	}
 
 	proj, err := s.repo.Create(ctx, store.CreateProjectParams{
 		Name:            req.Name,
@@ -68,15 +70,8 @@ func (s *Service) Create(ctx context.Context, req CreateProjectRequest) (Respons
 		Architecture:    pgtext.From(req.Architecture),
 		OwnerTeamID:     ownerTeamID,
 		TechLeadID:      techLeadID,
-		RepoUrl:         pgtext.From(req.RepoURL),
-		RepoProvider:    pgtext.From(req.RepoProvider),
-		DefaultBranch:   defaultBranch,
-		CiPipelineUrl:   pgtext.From(req.CIPipelineURL),
-		GitopsPath:      pgtext.From(req.GitopsPath),
-		Lifecycle:       lifecycle,
-		Tier:            pgtext.From(req.Tier),
-		Language:        pgtext.From(req.Language),
-		Framework:       pgtext.From(req.Framework),
+		LifecycleID:     lifecycleID,
+		TierID:          pgnum.Int2From(req.TierID),
 		DocsUrl:         pgtext.From(req.DocsURL),
 		DashboardUrl:    pgtext.From(req.DashboardURL),
 		RunbookUrl:      pgtext.From(req.RunbookURL),
@@ -308,15 +303,8 @@ func toResponse(p store.Project) Response {
 		Architecture:    pgtext.To(p.Architecture),
 		OwnerTeamID:     uuidutil.String(p.OwnerTeamID),
 		TechLeadID:      uuidutil.String(p.TechLeadID),
-		RepoURL:         pgtext.To(p.RepoUrl),
-		RepoProvider:    pgtext.To(p.RepoProvider),
-		DefaultBranch:   p.DefaultBranch,
-		CIPipelineURL:   pgtext.To(p.CiPipelineUrl),
-		GitopsPath:      pgtext.To(p.GitopsPath),
-		Lifecycle:       p.Lifecycle,
-		Tier:            pgtext.To(p.Tier),
-		Language:        pgtext.To(p.Language),
-		Framework:       pgtext.To(p.Framework),
+		LifecycleID:     p.LifecycleID,
+		TierID:          pgnum.Int2To(p.TierID),
 		DocsURL:         pgtext.To(p.DocsUrl),
 		DashboardURL:    pgtext.To(p.DashboardUrl),
 		RunbookURL:      pgtext.To(p.RunbookUrl),

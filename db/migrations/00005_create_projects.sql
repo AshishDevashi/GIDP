@@ -14,18 +14,9 @@ CREATE TABLE IF NOT EXISTS projects (
     owner_team_id     UUID NOT NULL REFERENCES teams(id),
     tech_lead_id      UUID REFERENCES users(id),
 
-    -- Source & CI/CD linkage
-    repo_url          TEXT,
-    repo_provider     VARCHAR(50),
-    default_branch    VARCHAR(100) NOT NULL DEFAULT 'main',
-    ci_pipeline_url   TEXT,
-    gitops_path       TEXT,
-
     -- Catalog metadata
-    lifecycle         VARCHAR(50) NOT NULL DEFAULT 'production',
-    tier              VARCHAR(20),
-    language          VARCHAR(50),
-    framework         VARCHAR(100),
+    lifecycle_id      SMALLINT NOT NULL REFERENCES lifecycles(id) DEFAULT 2,
+    tier_id           SMALLINT REFERENCES tiers(id),
 
     -- Docs & observability links
     docs_url          TEXT,

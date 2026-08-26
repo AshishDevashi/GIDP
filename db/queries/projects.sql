@@ -1,14 +1,12 @@
 -- name: CreateProject :one
 INSERT INTO projects (
     name, slug, description, project_type, architecture, owner_team_id, tech_lead_id,
-    repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path,
-    lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url,
+    lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url,
     parent_project_id
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7,
     $8, $9, $10, $11, $12,
-    $13, $14, $15, $16, $17, $18, $19,
-    $20
+    $13
 )
 RETURNING *;
 

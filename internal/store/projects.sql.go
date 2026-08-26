@@ -14,16 +14,14 @@ import (
 const createProject = `-- name: CreateProject :one
 INSERT INTO projects (
     name, slug, description, project_type, architecture, owner_team_id, tech_lead_id,
-    repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path,
-    lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url,
+    lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url,
     parent_project_id
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7,
     $8, $9, $10, $11, $12,
-    $13, $14, $15, $16, $17, $18, $19,
-    $20
+    $13
 )
-RETURNING id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path, lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at
+RETURNING id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at
 `
 
 type CreateProjectParams struct {
@@ -34,15 +32,8 @@ type CreateProjectParams struct {
 	Architecture    pgtype.Text `json:"architecture"`
 	OwnerTeamID     pgtype.UUID `json:"owner_team_id"`
 	TechLeadID      pgtype.UUID `json:"tech_lead_id"`
-	RepoUrl         pgtype.Text `json:"repo_url"`
-	RepoProvider    pgtype.Text `json:"repo_provider"`
-	DefaultBranch   string      `json:"default_branch"`
-	CiPipelineUrl   pgtype.Text `json:"ci_pipeline_url"`
-	GitopsPath      pgtype.Text `json:"gitops_path"`
-	Lifecycle       string      `json:"lifecycle"`
-	Tier            pgtype.Text `json:"tier"`
-	Language        pgtype.Text `json:"language"`
-	Framework       pgtype.Text `json:"framework"`
+	LifecycleID     int16       `json:"lifecycle_id"`
+	TierID          pgtype.Int2 `json:"tier_id"`
 	DocsUrl         pgtype.Text `json:"docs_url"`
 	DashboardUrl    pgtype.Text `json:"dashboard_url"`
 	RunbookUrl      pgtype.Text `json:"runbook_url"`
@@ -58,15 +49,8 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 		arg.Architecture,
 		arg.OwnerTeamID,
 		arg.TechLeadID,
-		arg.RepoUrl,
-		arg.RepoProvider,
-		arg.DefaultBranch,
-		arg.CiPipelineUrl,
-		arg.GitopsPath,
-		arg.Lifecycle,
-		arg.Tier,
-		arg.Language,
-		arg.Framework,
+		arg.LifecycleID,
+		arg.TierID,
 		arg.DocsUrl,
 		arg.DashboardUrl,
 		arg.RunbookUrl,
@@ -82,15 +66,8 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 		&i.Architecture,
 		&i.OwnerTeamID,
 		&i.TechLeadID,
-		&i.RepoUrl,
-		&i.RepoProvider,
-		&i.DefaultBranch,
-		&i.CiPipelineUrl,
-		&i.GitopsPath,
-		&i.Lifecycle,
-		&i.Tier,
-		&i.Language,
-		&i.Framework,
+		&i.LifecycleID,
+		&i.TierID,
 		&i.DocsUrl,
 		&i.DashboardUrl,
 		&i.RunbookUrl,
@@ -103,7 +80,7 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 }
 
 const getProjectByID = `-- name: GetProjectByID :one
-SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path, lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
+SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
 WHERE id = $1
 LIMIT 1
 `
@@ -120,15 +97,8 @@ func (q *Queries) GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, 
 		&i.Architecture,
 		&i.OwnerTeamID,
 		&i.TechLeadID,
-		&i.RepoUrl,
-		&i.RepoProvider,
-		&i.DefaultBranch,
-		&i.CiPipelineUrl,
-		&i.GitopsPath,
-		&i.Lifecycle,
-		&i.Tier,
-		&i.Language,
-		&i.Framework,
+		&i.LifecycleID,
+		&i.TierID,
 		&i.DocsUrl,
 		&i.DashboardUrl,
 		&i.RunbookUrl,
@@ -141,7 +111,7 @@ func (q *Queries) GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, 
 }
 
 const getProjectBySlug = `-- name: GetProjectBySlug :one
-SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path, lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
+SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
 WHERE slug = $1
 LIMIT 1
 `
@@ -158,15 +128,8 @@ func (q *Queries) GetProjectBySlug(ctx context.Context, slug string) (Project, e
 		&i.Architecture,
 		&i.OwnerTeamID,
 		&i.TechLeadID,
-		&i.RepoUrl,
-		&i.RepoProvider,
-		&i.DefaultBranch,
-		&i.CiPipelineUrl,
-		&i.GitopsPath,
-		&i.Lifecycle,
-		&i.Tier,
-		&i.Language,
-		&i.Framework,
+		&i.LifecycleID,
+		&i.TierID,
 		&i.DocsUrl,
 		&i.DashboardUrl,
 		&i.RunbookUrl,
@@ -179,7 +142,7 @@ func (q *Queries) GetProjectBySlug(ctx context.Context, slug string) (Project, e
 }
 
 const listChildProjects = `-- name: ListChildProjects :many
-SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path, lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
+SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
 WHERE parent_project_id = $1
 ORDER BY created_at
 `
@@ -202,15 +165,8 @@ func (q *Queries) ListChildProjects(ctx context.Context, parentProjectID pgtype.
 			&i.Architecture,
 			&i.OwnerTeamID,
 			&i.TechLeadID,
-			&i.RepoUrl,
-			&i.RepoProvider,
-			&i.DefaultBranch,
-			&i.CiPipelineUrl,
-			&i.GitopsPath,
-			&i.Lifecycle,
-			&i.Tier,
-			&i.Language,
-			&i.Framework,
+			&i.LifecycleID,
+			&i.TierID,
 			&i.DocsUrl,
 			&i.DashboardUrl,
 			&i.RunbookUrl,
@@ -230,7 +186,7 @@ func (q *Queries) ListChildProjects(ctx context.Context, parentProjectID pgtype.
 }
 
 const listProjects = `-- name: ListProjects :many
-SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, repo_url, repo_provider, default_branch, ci_pipeline_url, gitops_path, lifecycle, tier, language, framework, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
+SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
 ORDER BY created_at
 `
 
@@ -252,15 +208,8 @@ func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
 			&i.Architecture,
 			&i.OwnerTeamID,
 			&i.TechLeadID,
-			&i.RepoUrl,
-			&i.RepoProvider,
-			&i.DefaultBranch,
-			&i.CiPipelineUrl,
-			&i.GitopsPath,
-			&i.Lifecycle,
-			&i.Tier,
-			&i.Language,
-			&i.Framework,
+			&i.LifecycleID,
+			&i.TierID,
 			&i.DocsUrl,
 			&i.DashboardUrl,
 			&i.RunbookUrl,

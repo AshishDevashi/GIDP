@@ -12,16 +12,8 @@ type CreateProjectRequest struct {
 	OwnerTeamID string `json:"owner_team_id" binding:"required,uuid"`
 	TechLeadID  string `json:"tech_lead_id" binding:"omitempty,uuid"`
 
-	RepoURL       string `json:"repo_url"`
-	RepoProvider  string `json:"repo_provider"`
-	DefaultBranch string `json:"default_branch"`
-	CIPipelineURL string `json:"ci_pipeline_url"`
-	GitopsPath    string `json:"gitops_path"`
-
-	Lifecycle string `json:"lifecycle"`
-	Tier      string `json:"tier"`
-	Language  string `json:"language"`
-	Framework string `json:"framework"`
+	LifecycleID int16 `json:"lifecycle_id"`
+	TierID      int16 `json:"tier_id"`
 
 	DocsURL      string `json:"docs_url"`
 	DashboardURL string `json:"dashboard_url"`
@@ -68,15 +60,8 @@ type Response struct {
 	Architecture    string `json:"architecture,omitempty"`
 	OwnerTeamID     string `json:"owner_team_id"`
 	TechLeadID      string `json:"tech_lead_id,omitempty"`
-	RepoURL         string `json:"repo_url,omitempty"`
-	RepoProvider    string `json:"repo_provider,omitempty"`
-	DefaultBranch   string `json:"default_branch"`
-	CIPipelineURL   string `json:"ci_pipeline_url,omitempty"`
-	GitopsPath      string `json:"gitops_path,omitempty"`
-	Lifecycle       string `json:"lifecycle"`
-	Tier            string `json:"tier,omitempty"`
-	Language        string `json:"language,omitempty"`
-	Framework       string `json:"framework,omitempty"`
+	LifecycleID     int16  `json:"lifecycle_id"`
+	TierID          int16  `json:"tier_id,omitempty"`
 	DocsURL         string `json:"docs_url,omitempty"`
 	DashboardURL    string `json:"dashboard_url,omitempty"`
 	RunbookURL      string `json:"runbook_url,omitempty"`

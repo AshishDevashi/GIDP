@@ -101,6 +101,15 @@ Inside a protected handler, read the authenticated user via
 - Follow existing naming: package names singular and lowercase (`user`, `auth`), no stutter
   (`user.Repository`, not `user.UserRepository`).
 
+### Known editor quirk: duplicate `package` line on new files
+
+This workspace has an editor extension that auto-inserts a `package <name>` line at the top of newly created
+`.go` files. When a tool creates a new file and also writes its own `package` declaration, the result is two
+`package` lines at the top of the file (e.g. `package auth\npackage auth`), which fails to compile with
+`syntax error: non-declaration statement outside function body`. After creating any new `.go` file, always
+open it and check the first couple of lines for a duplicated `package` statement (and remove the extra one)
+before moving on — do this as a matter of course, not just when a build error surfaces.
+
 ## What NOT to do
 
 - Do not run builds, tests, or start containers/services unless explicitly asked to. Prioritize making the
