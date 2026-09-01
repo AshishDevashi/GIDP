@@ -56,9 +56,7 @@ CREATE TABLE IF NOT EXISTS repo_providers (
 );
 
 INSERT INTO repo_providers (id, code) VALUES
-    (1, 'github'),
-    (2, 'gitlab'),
-    (3, 'bitbucket')
+    (1, 'github')
 ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS languages (

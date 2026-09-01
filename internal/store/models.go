@@ -85,6 +85,26 @@ type ProjectService struct {
 	ServiceID pgtype.UUID `json:"service_id"`
 }
 
+type Repo struct {
+	ID            pgtype.UUID        `json:"id"`
+	Name          string             `json:"name"`
+	FullName      pgtype.Text        `json:"full_name"`
+	Owner         string             `json:"owner"`
+	ProviderID    int16              `json:"provider_id"`
+	ExternalID    pgtype.Text        `json:"external_id"`
+	Url           pgtype.Text        `json:"url"`
+	CloneUrlSsh   pgtype.Text        `json:"clone_url_ssh"`
+	CloneUrlHttps pgtype.Text        `json:"clone_url_https"`
+	DefaultBranch string             `json:"default_branch"`
+	Visibility    string             `json:"visibility"`
+	TemplateUsed  pgtype.Text        `json:"template_used"`
+	Status        string             `json:"status"`
+	ErrorMessage  pgtype.Text        `json:"error_message"`
+	CreatedBy     pgtype.UUID        `json:"created_by"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
 type RepoProvider struct {
 	ID   int16  `json:"id"`
 	Code string `json:"code"`

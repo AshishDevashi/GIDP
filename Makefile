@@ -6,7 +6,7 @@ run:
 	go run ./cmd/api
 
 dev:
-	air
+	@set -a; . ./.env; set +a; air
 
 up:
 	docker compose up -d --build

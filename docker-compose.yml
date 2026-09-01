@@ -17,23 +17,24 @@ services:
       timeout: 5s
       retries: 10
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: gidp-app
-    restart: unless-stopped
-    environment:
-      APP_ENV: development
-      APP_PORT: 8080
-      DATABASE_URL: postgres://postgres:postgres@db:5432/wolf_platform?sslmode=disable
-      JWT_SECRET: dev-secret-change-me
-      JWT_TTL: 24h
-    ports:
-      - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: gidp-app
+  #   restart: unless-stopped
+  #   environment:
+  #     APP_ENV: development
+  #     APP_PORT: 8080
+  #     DATABASE_URL: postgres://postgres:postgres@db:5432/wolf_platform?sslmode=disable
+  #     JWT_SECRET: dev-secret-change-me
+  #     JWT_TTL: 24h
+  #     GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
 
 volumes:
   gidp_pgdata:

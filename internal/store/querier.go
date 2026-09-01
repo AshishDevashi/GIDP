@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	ActivateRepo(ctx context.Context, arg ActivateRepoParams) (Repo, error)
 	AddProjectDependency(ctx context.Context, arg AddProjectDependencyParams) (ProjectDependency, error)
 	AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) (ProjectEnvironment, error)
 	AddServiceDependency(ctx context.Context, arg AddServiceDependencyParams) (ServiceDependency, error)
@@ -19,10 +20,13 @@ type Querier interface {
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
 	CreateDeployment(ctx context.Context, arg CreateDeploymentParams) (Deployment, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
+	CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteRepo(ctx context.Context, id pgtype.UUID) (int64, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	FailRepo(ctx context.Context, arg FailRepoParams) (Repo, error)
 	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
 	// Latest successful deployment for a service+environment, i.e. what's actually running.
 	GetCurrentDeployment(ctx context.Context, arg GetCurrentDeploymentParams) (Deployment, error)
@@ -30,6 +34,7 @@ type Querier interface {
 	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
 	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
+	GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetServiceByID(ctx context.Context, id pgtype.UUID) (Service, error)
 	GetServiceBySlug(ctx context.Context, slug string) (Service, error)
@@ -55,6 +60,7 @@ type Querier interface {
 	ListProjectServices(ctx context.Context, projectID pgtype.UUID) ([]ProjectService, error)
 	ListProjects(ctx context.Context) ([]Project, error)
 	ListRepoProviders(ctx context.Context) ([]RepoProvider, error)
+	ListRepos(ctx context.Context) ([]Repo, error)
 	// Services that the given service depends on.
 	ListServiceDependencies(ctx context.Context, serviceID pgtype.UUID) ([]ServiceDependency, error)
 	ListServiceEnvironments(ctx context.Context, serviceID pgtype.UUID) ([]ServiceEnvironment, error)
@@ -66,6 +72,7 @@ type Querier interface {
 	ListTeams(ctx context.Context) ([]Team, error)
 	ListTiers(ctx context.Context) ([]Tier, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	MarkRepoCreating(ctx context.Context, id pgtype.UUID) (Repo, error)
 	RemoveProjectDependency(ctx context.Context, arg RemoveProjectDependencyParams) error
 	RemoveServiceDependency(ctx context.Context, arg RemoveServiceDependencyParams) error
 	RemoveServiceTag(ctx context.Context, arg RemoveServiceTagParams) error
@@ -74,6 +81,7 @@ type Querier interface {
 	// The only mutation ever allowed on a deployment row after creation.
 	UpdateDeploymentStatus(ctx context.Context, arg UpdateDeploymentStatusParams) (Deployment, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	UpdateRepo(ctx context.Context, arg UpdateRepoParams) (Repo, error)
 }
 
 var _ Querier = (*Queries)(nil)
