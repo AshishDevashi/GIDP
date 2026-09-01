@@ -51,26 +51,23 @@ func newGitHubClient(token string) *githubClient {
 	}
 }
 
-func (c *githubClient) createRepository(ctx context.Context, req CreateRequest) (githubRepository, error) {
+func (c *githubClient) createRepositoryFromTemplate(ctx context.Context, templateOwner, templateRepo string, req CreateRequest) (githubRepository, error) {
 	body, err := json.Marshal(struct {
+		Owner       string `json:"owner,omitempty"`
 		Name        string `json:"name"`
 		Description string `json:"description,omitempty"`
 		Private     bool   `json:"private"`
-		AutoInit    bool   `json:"auto_init"`
 	}{
+		Owner:       req.Organization,
 		Name:        req.Name,
 		Description: req.Description,
 		Private:     req.Private,
-		AutoInit:    req.AutoInit,
 	})
 	if err != nil {
 		return githubRepository{}, err
 	}
 
-	endpoint := githubAPIURL + "/user/repos"
-	if req.Organization != "" {
-		endpoint = githubAPIURL + "/orgs/" + url.PathEscape(req.Organization) + "/repos"
-	}
+	endpoint := githubAPIURL + "/repos/" + url.PathEscape(templateOwner) + "/" + url.PathEscape(templateRepo) + "/generate"
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
@@ -81,12 +78,13 @@ func (c *githubClient) createRepository(ctx context.Context, req CreateRequest) 
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("X-GitHub-Api-Version", "2026-03-10")
 
-	slog.InfoContext(ctx, "creating github repository",
+	slog.InfoContext(ctx, "creating github repository from template",
 		"endpoint", endpoint,
+		"template_owner", templateOwner,
+		"template_repo", templateRepo,
 		"name", req.Name,
 		"organization", req.Organization,
 		"private", req.Private,
-		"auto_init", req.AutoInit,
 		"token_configured", c.token != "",
 	)
 
@@ -126,7 +124,7 @@ func (c *githubClient) createRepository(ctx context.Context, req CreateRequest) 
 	if err := json.NewDecoder(io.LimitReader(httpResp.Body, 1<<20)).Decode(&repository); err != nil {
 		return githubRepository{}, err
 	}
-	slog.InfoContext(ctx, "github repository created",
+	slog.InfoContext(ctx, "github repository created from template",
 		"full_name", repository.FullName,
 		"html_url", repository.HTMLURL,
 		"github_request_id", httpResp.Header.Get("X-GitHub-Request-Id"),

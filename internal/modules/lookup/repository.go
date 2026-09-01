@@ -35,3 +35,7 @@ func (r *Repository) ListRepoProviders(ctx context.Context) ([]store.RepoProvide
 func (r *Repository) ListLanguages(ctx context.Context) ([]store.Language, error) {
 	return r.queries.ListLanguages(ctx)
 }
+
+func (r *Repository) ListRepoTemplates(ctx context.Context) ([]store.RepoTemplate, error) {
+	return r.queries.ListRepoTemplates(ctx)
+}

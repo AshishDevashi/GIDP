@@ -26,6 +26,7 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	lookups.GET("/service-types", m.serviceTypes)
 	lookups.GET("/repo-providers", m.repoProviders)
 	lookups.GET("/languages", m.languages)
+	lookups.GET("/repo-templates", m.repoTemplates)
 }
 
 func (m *Module) lifecycles(c *gin.Context) {
@@ -66,6 +67,15 @@ func (m *Module) repoProviders(c *gin.Context) {
 
 func (m *Module) languages(c *gin.Context) {
 	items, err := m.service.Languages(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.JSON(c, http.StatusOK, items)
+}
+
+func (m *Module) repoTemplates(c *gin.Context) {
+	items, err := m.service.RepoTemplates(c.Request.Context())
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

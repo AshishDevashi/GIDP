@@ -72,7 +72,29 @@ INSERT INTO languages (id, code, label) VALUES
     (4, 'node', 'Node.js')
 ON CONFLICT (id) DO NOTHING;
 
+CREATE TABLE IF NOT EXISTS repo_templates (
+    id            SMALLINT PRIMARY KEY,
+    name          VARCHAR(100) NOT NULL,
+    slug          VARCHAR(50)  NOT NULL UNIQUE,
+
+    template_owner VARCHAR(150) NOT NULL,
+    template_repo  VARCHAR(150) NOT NULL,
+
+    is_active     BOOLEAN NOT NULL DEFAULT true,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_template_owner_repo UNIQUE (template_owner, template_repo)
+);
+
+INSERT INTO repo_templates (id, name, slug, template_owner, template_repo) VALUES
+    (1, 'Go App',     'go-app',     'AshishDevashi', 'go-app-template-idp'),
+    (2, 'Python App', 'python-app', 'AshishDevashi', 'python-app-template-idp'),
+    (3, 'Java App',   'java-app',   'AshishDevashi', 'java-app-template-idp'),
+    (4, 'Node App',   'node-app',   'AshishDevashi', 'node-app-template-idp')
+ON CONFLICT (id) DO NOTHING;
+
 -- +goose Down
+DROP TABLE IF EXISTS repo_templates;
 DROP TABLE IF EXISTS languages;
 DROP TABLE IF EXISTS repo_providers;
 DROP TABLE IF EXISTS service_types;

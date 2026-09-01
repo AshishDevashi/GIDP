@@ -21,6 +21,10 @@ func (r *Repository) Create(ctx context.Context, arg store.CreateRepoParams) (st
 	return r.queries.CreateRepo(ctx, arg)
 }
 
+func (r *Repository) GetTemplateBySlug(ctx context.Context, slug string) (store.RepoTemplate, error) {
+	return r.queries.GetRepoTemplateBySlug(ctx, slug)
+}
+
 func (r *Repository) MarkCreating(ctx context.Context, id pgtype.UUID) (store.Repo, error) {
 	return r.queries.MarkRepoCreating(ctx, id)
 }

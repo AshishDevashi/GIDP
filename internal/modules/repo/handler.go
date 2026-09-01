@@ -98,9 +98,11 @@ func (m *Module) respondServiceError(c *gin.Context, err error) {
 		response.Error(c, http.StatusNotFound, err.Error())
 	case errors.Is(err, ErrInvalidID):
 		response.Error(c, http.StatusBadRequest, err.Error())
+	case errors.Is(err, ErrTemplateNotFound):
+		response.Error(c, http.StatusBadRequest, err.Error())
 	case errors.Is(err, ErrUnauthorized):
 		response.Error(c, http.StatusBadGateway, err.Error())
-	case errors.Is(err, ErrOrganization):
+	case errors.Is(err, ErrTemplateInaccessible):
 		response.Error(c, http.StatusNotFound, err.Error())
 	case errors.Is(err, ErrRepositoryInvalid):
 		response.Error(c, http.StatusUnprocessableEntity, err.Error())

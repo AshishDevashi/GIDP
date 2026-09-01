@@ -84,6 +84,40 @@ func (q *Queries) ListRepoProviders(ctx context.Context) ([]RepoProvider, error)
 	return items, nil
 }
 
+const listRepoTemplates = `-- name: ListRepoTemplates :many
+SELECT id, name, slug, template_owner, template_repo, is_active, created_at FROM repo_templates
+WHERE is_active = true
+ORDER BY id
+`
+
+func (q *Queries) ListRepoTemplates(ctx context.Context) ([]RepoTemplate, error) {
+	rows, err := q.db.Query(ctx, listRepoTemplates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RepoTemplate
+	for rows.Next() {
+		var i RepoTemplate
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.TemplateOwner,
+			&i.TemplateRepo,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listServiceTypes = `-- name: ListServiceTypes :many
 SELECT id, code FROM service_types
 ORDER BY id

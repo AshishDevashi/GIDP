@@ -1,12 +1,12 @@
 package repo
 
-// CreateRequest is the payload for creating a GitHub repository.
+// CreateRequest is the payload for creating a GitHub repository from a predefined template.
 type CreateRequest struct {
 	Name         string `json:"name" binding:"required,max=100"`
 	Description  string `json:"description" binding:"max=350"`
 	Organization string `json:"organization" binding:"omitempty,max=39"`
+	Language     string `json:"language" binding:"required,oneof=go java python node"`
 	Private      bool   `json:"private"`
-	AutoInit     bool   `json:"auto_init"`
 }
 
 // UpdateRequest is the payload for updating repository metadata in the portal.

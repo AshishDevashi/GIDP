@@ -35,6 +35,7 @@ type Querier interface {
 	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
 	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
 	GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
+	GetRepoTemplateBySlug(ctx context.Context, slug string) (RepoTemplate, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetServiceByID(ctx context.Context, id pgtype.UUID) (Service, error)
 	GetServiceBySlug(ctx context.Context, slug string) (Service, error)
@@ -60,6 +61,7 @@ type Querier interface {
 	ListProjectServices(ctx context.Context, projectID pgtype.UUID) ([]ProjectService, error)
 	ListProjects(ctx context.Context) ([]Project, error)
 	ListRepoProviders(ctx context.Context) ([]RepoProvider, error)
+	ListRepoTemplates(ctx context.Context) ([]RepoTemplate, error)
 	ListRepos(ctx context.Context) ([]Repo, error)
 	// Services that the given service depends on.
 	ListServiceDependencies(ctx context.Context, serviceID pgtype.UUID) ([]ServiceDependency, error)

@@ -14,3 +14,12 @@ type TierItem struct {
 	Description  string `json:"description,omitempty"`
 	PagingPolicy string `json:"paging_policy,omitempty"`
 }
+
+// RepoTemplateItem is the public representation of a predefined repository template.
+type RepoTemplateItem struct {
+	ID            int16  `json:"id"`
+	Name          string `json:"name"`
+	Slug          string `json:"slug"`
+	TemplateOwner string `json:"template_owner"`
+	TemplateRepo  string `json:"template_repo"`
+}

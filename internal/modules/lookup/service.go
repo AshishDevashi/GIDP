@@ -73,6 +73,24 @@ func (s *Service) Languages(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
+func (s *Service) RepoTemplates(ctx context.Context) ([]RepoTemplateItem, error) {
+	rows, err := s.repo.ListRepoTemplates(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]RepoTemplateItem, len(rows))
+	for i, r := range rows {
+		items[i] = RepoTemplateItem{
+			ID:            r.ID,
+			Name:          r.Name,
+			Slug:          r.Slug,
+			TemplateOwner: r.TemplateOwner,
+			TemplateRepo:  r.TemplateRepo,
+		}
+	}
+	return items, nil
+}
+
 func toItems[T any](rows []T, convert func(T) Item) []Item {
 	items := make([]Item, len(rows))
 	for i, r := range rows {

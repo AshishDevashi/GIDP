@@ -1,10 +1,15 @@
 -- name: CreateRepo :one
 INSERT INTO repos (
-    name, owner, provider_id, visibility, created_by, status
+    name, owner, provider_id, visibility, created_by, template_used, status
 ) VALUES (
-    $1, $2, $3, $4, $5, 'pending'
+    $1, $2, $3, $4, $5, $6, 'pending'
 )
 RETURNING *;
+
+-- name: GetRepoTemplateBySlug :one
+SELECT * FROM repo_templates
+WHERE slug = $1 AND is_active = true
+LIMIT 1;
 
 -- name: MarkRepoCreating :one
 UPDATE repos

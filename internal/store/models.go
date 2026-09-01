@@ -110,6 +110,16 @@ type RepoProvider struct {
 	Code string `json:"code"`
 }
 
+type RepoTemplate struct {
+	ID            int16              `json:"id"`
+	Name          string             `json:"name"`
+	Slug          string             `json:"slug"`
+	TemplateOwner string             `json:"template_owner"`
+	TemplateRepo  string             `json:"template_repo"`
+	IsActive      bool               `json:"is_active"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
 type Role struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`

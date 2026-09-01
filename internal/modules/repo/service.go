@@ -20,14 +20,15 @@ import (
 const githubProviderID int16 = 1
 
 var (
-	ErrNotConfigured     = errors.New("github integration is not configured")
-	ErrUnauthorized      = errors.New("github credentials are invalid or lack repository permissions")
-	ErrOrganization      = errors.New("github organization was not found or is not accessible")
-	ErrRepositoryInvalid = errors.New("github repository already exists or its settings are invalid")
-	ErrGitHubUnavailable = errors.New("github is currently unavailable")
-	ErrRepoTaken         = errors.New("repository already exists for this owner and provider")
-	ErrNotFound          = errors.New("repository not found")
-	ErrInvalidID         = errors.New("invalid id")
+	ErrNotConfigured        = errors.New("github integration is not configured")
+	ErrUnauthorized         = errors.New("github credentials are invalid or lack repository permissions")
+	ErrTemplateInaccessible = errors.New("template repository was not found, is not accessible, or is not marked as a GitHub template repository")
+	ErrRepositoryInvalid    = errors.New("github repository already exists or its settings are invalid")
+	ErrGitHubUnavailable    = errors.New("github is currently unavailable")
+	ErrRepoTaken            = errors.New("repository already exists for this owner and provider")
+	ErrNotFound             = errors.New("repository not found")
+	ErrInvalidID            = errors.New("invalid id")
+	ErrTemplateNotFound     = errors.New("no active template found for the requested language")
 )
 
 type Service struct {
@@ -45,6 +46,14 @@ func (s *Service) Create(ctx context.Context, req CreateRequest, userID, usernam
 		return Response{}, ErrInvalidID
 	}
 
+	template, err := s.repo.GetTemplateBySlug(ctx, req.Language+"-app")
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Response{}, ErrTemplateNotFound
+		}
+		return Response{}, err
+	}
+
 	owner := username
 	if req.Organization != "" {
 		owner = req.Organization
@@ -55,11 +64,12 @@ func (s *Service) Create(ctx context.Context, req CreateRequest, userID, usernam
 	}
 
 	persisted, err := s.repo.Create(ctx, store.CreateRepoParams{
-		Name:       req.Name,
-		Owner:      owner,
-		ProviderID: githubProviderID,
-		Visibility: visibility,
-		CreatedBy:  createdBy,
+		Name:         req.Name,
+		Owner:        owner,
+		ProviderID:   githubProviderID,
+		Visibility:   visibility,
+		CreatedBy:    createdBy,
+		TemplateUsed: pgtext.From(template.Slug),
 	})
 	if err != nil {
 		if isUniqueViolation(err) {
@@ -76,7 +86,7 @@ func (s *Service) Create(ctx context.Context, req CreateRequest, userID, usernam
 		return s.fail(ctx, persisted.ID, ErrNotConfigured.Error(), ErrNotConfigured)
 	}
 
-	githubRepo, err := s.client.createRepository(ctx, req)
+	githubRepo, err := s.client.createRepositoryFromTemplate(ctx, template.TemplateOwner, template.TemplateRepo, req)
 	if err != nil {
 		mappedErr := mapGitHubError(err)
 		return s.fail(ctx, persisted.ID, githubFailureMessage(err, mappedErr), mappedErr)
@@ -230,7 +240,7 @@ func mapGitHubError(err error) error {
 	case http.StatusUnauthorized, http.StatusForbidden:
 		return ErrUnauthorized
 	case http.StatusNotFound:
-		return ErrOrganization
+		return ErrTemplateInaccessible
 	case http.StatusUnprocessableEntity:
 		return ErrRepositoryInvalid
 	default:

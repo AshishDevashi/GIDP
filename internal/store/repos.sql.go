@@ -77,19 +77,20 @@ func (q *Queries) ActivateRepo(ctx context.Context, arg ActivateRepoParams) (Rep
 
 const createRepo = `-- name: CreateRepo :one
 INSERT INTO repos (
-    name, owner, provider_id, visibility, created_by, status
+    name, owner, provider_id, visibility, created_by, template_used, status
 ) VALUES (
-    $1, $2, $3, $4, $5, 'pending'
+    $1, $2, $3, $4, $5, $6, 'pending'
 )
 RETURNING id, name, full_name, owner, provider_id, external_id, url, clone_url_ssh, clone_url_https, default_branch, visibility, template_used, status, error_message, created_by, created_at, updated_at
 `
 
 type CreateRepoParams struct {
-	Name       string      `json:"name"`
-	Owner      string      `json:"owner"`
-	ProviderID int16       `json:"provider_id"`
-	Visibility string      `json:"visibility"`
-	CreatedBy  pgtype.UUID `json:"created_by"`
+	Name         string      `json:"name"`
+	Owner        string      `json:"owner"`
+	ProviderID   int16       `json:"provider_id"`
+	Visibility   string      `json:"visibility"`
+	CreatedBy    pgtype.UUID `json:"created_by"`
+	TemplateUsed pgtype.Text `json:"template_used"`
 }
 
 func (q *Queries) CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, error) {
@@ -99,6 +100,7 @@ func (q *Queries) CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, e
 		arg.ProviderID,
 		arg.Visibility,
 		arg.CreatedBy,
+		arg.TemplateUsed,
 	)
 	var i Repo
 	err := row.Scan(
@@ -200,6 +202,27 @@ func (q *Queries) GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getRepoTemplateBySlug = `-- name: GetRepoTemplateBySlug :one
+SELECT id, name, slug, template_owner, template_repo, is_active, created_at FROM repo_templates
+WHERE slug = $1 AND is_active = true
+LIMIT 1
+`
+
+func (q *Queries) GetRepoTemplateBySlug(ctx context.Context, slug string) (RepoTemplate, error) {
+	row := q.db.QueryRow(ctx, getRepoTemplateBySlug, slug)
+	var i RepoTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.TemplateOwner,
+		&i.TemplateRepo,
+		&i.IsActive,
+		&i.CreatedAt,
 	)
 	return i, err
 }
