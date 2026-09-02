@@ -91,6 +91,53 @@ func (s *Service) RepoTemplates(ctx context.Context) ([]RepoTemplateItem, error)
 	return items, nil
 }
 
+func (s *Service) All(ctx context.Context) (AllLookupsResponse, error) {
+	lifecycles, err := s.Lifecycles(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+	tiers, err := s.Tiers(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+	serviceTypes, err := s.ServiceTypes(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+	repoProviders, err := s.RepoProviders(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+	languages, err := s.Languages(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+	repoTemplates, err := s.RepoTemplates(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
+
+	return BuildAllLookupsPayload(lifecycles, tiers, serviceTypes, repoProviders, languages, repoTemplates), nil
+}
+
+func BuildAllLookupsPayload(
+	lifecycles []Item,
+	tiers []TierItem,
+	serviceTypes []Item,
+	repoProviders []Item,
+	languages []Item,
+	repoTemplates []RepoTemplateItem,
+) AllLookupsResponse {
+	return AllLookupsResponse{
+		Lifecycles:    lifecycles,
+		Tiers:         tiers,
+		ServiceTypes:  serviceTypes,
+		RepoProviders: repoProviders,
+		Languages:     languages,
+		RepoTemplates: repoTemplates,
+	}
+}
+
 func toItems[T any](rows []T, convert func(T) Item) []Item {
 	items := make([]Item, len(rows))
 	for i, r := range rows {

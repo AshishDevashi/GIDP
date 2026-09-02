@@ -17,6 +17,7 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/modules/service"
 	"github.com/AshishDevashi/GIDP/internal/modules/team"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -43,6 +44,12 @@ func New(cfg *config.Config, log *slog.Logger, db *pgxpool.Pool) *Server {
 	}
 
 	s.router.Use(gin.Recovery())
+	s.router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		MaxAge:       12 * time.Hour,
+	}))
 	s.registerModules()
 
 	return s
