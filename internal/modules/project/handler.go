@@ -25,11 +25,17 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	projects.POST("", m.create)
 	projects.GET("", m.list)
 	projects.GET("/:id", m.getBySlug)
+	projects.PUT("/:id", m.update)
+	projects.DELETE("/:id", m.delete)
+
 	projects.POST("/:id/environments", m.addEnvironment)
 	projects.GET("/:id/environments", m.listEnvironments)
+
 	projects.POST("/:id/services", m.linkService)
 	projects.GET("/:id/services", m.listServices)
+
 	projects.DELETE("/:id/services/:serviceId", m.unlinkService)
+
 	projects.POST("/:id/dependencies", m.addDependency)
 	projects.GET("/:id/dependencies", m.listDependencies)
 	projects.GET("/:id/dependents", m.listDependents)
@@ -70,6 +76,31 @@ func (m *Module) getBySlug(c *gin.Context) {
 	}
 
 	response.JSON(c, http.StatusOK, proj)
+}
+
+func (m *Module) update(c *gin.Context) {
+	var req UpdateProjectRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	proj, err := m.service.Update(c.Request.Context(), c.Param("id"), req)
+	if err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	response.JSON(c, http.StatusOK, proj)
+}
+
+func (m *Module) delete(c *gin.Context) {
+	if err := m.service.Delete(c.Request.Context(), c.Param("id")); err != nil {
+		m.respondServiceError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func (m *Module) addEnvironment(c *gin.Context) {
@@ -182,9 +213,11 @@ func (m *Module) respondServiceError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, ErrSlugTaken), errors.Is(err, ErrEnvironmentTaken):
 		response.Error(c, http.StatusConflict, err.Error())
+	case errors.Is(err, ErrProjectInUse):
+		response.Error(c, http.StatusConflict, err.Error())
 	case errors.Is(err, ErrNotFound):
 		response.Error(c, http.StatusNotFound, err.Error())
-	case errors.Is(err, ErrInvalidID):
+	case errors.Is(err, ErrInvalidID), errors.Is(err, ErrInvalidParent), errors.Is(err, ErrInvalidReference):
 		response.Error(c, http.StatusBadRequest, err.Error())
 	default:
 		response.Error(c, http.StatusInternalServerError, err.Error())

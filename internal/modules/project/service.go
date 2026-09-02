@@ -9,6 +9,7 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/platform/uuidutil"
 	"github.com/AshishDevashi/GIDP/internal/store"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -23,6 +24,9 @@ var (
 	ErrNotFound         = errors.New("project not found")
 	ErrEnvironmentTaken = errors.New("environment is already registered for this project")
 	ErrInvalidID        = errors.New("invalid id")
+	ErrInvalidParent    = errors.New("project cannot be its own parent")
+	ErrInvalidReference = errors.New("related resource does not exist")
+	ErrProjectInUse     = errors.New("project is referenced by other resources")
 )
 
 // Service contains the project module's business logic.
@@ -55,6 +59,9 @@ func (s *Service) Create(ctx context.Context, req CreateProjectRequest) (Respons
 	if err != nil {
 		return Response{}, ErrInvalidID
 	}
+	if err := s.validateParent(ctx, pgtype.UUID{}, parentProjectID); err != nil {
+		return Response{}, err
+	}
 
 	projectType := defaultString(req.ProjectType, DefaultProjectType)
 	lifecycleID := req.LifecycleID
@@ -78,6 +85,12 @@ func (s *Service) Create(ctx context.Context, req CreateProjectRequest) (Respons
 		ParentProjectID: parentProjectID,
 	})
 	if err != nil {
+		if isUniqueViolation(err) {
+			return Response{}, ErrSlugTaken
+		}
+		if isForeignKeyViolation(err) {
+			return Response{}, ErrInvalidReference
+		}
 		return Response{}, err
 	}
 
@@ -106,6 +119,121 @@ func (s *Service) GetBySlug(ctx context.Context, slug string) (Response, error) 
 		return Response{}, err
 	}
 	return toResponse(proj), nil
+}
+
+func (s *Service) Update(ctx context.Context, id string, req UpdateProjectRequest) (Response, error) {
+	projectID, err := uuidutil.Parse(id)
+	if err != nil {
+		return Response{}, ErrInvalidID
+	}
+
+	current, err := s.repo.GetByID(ctx, projectID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Response{}, ErrNotFound
+		}
+		return Response{}, err
+	}
+
+	if existing, err := s.repo.GetBySlug(ctx, req.Slug); err == nil {
+		if existing.ID != projectID {
+			return Response{}, ErrSlugTaken
+		}
+	} else if !errors.Is(err, pgx.ErrNoRows) {
+		return Response{}, err
+	}
+
+	ownerTeamID, err := uuidutil.Parse(req.OwnerTeamID)
+	if err != nil {
+		return Response{}, ErrInvalidID
+	}
+
+	techLeadID, err := optionalUUID(req.TechLeadID)
+	if err != nil {
+		return Response{}, ErrInvalidID
+	}
+
+	parentProjectID, err := optionalUUID(req.ParentProjectID)
+	if err != nil {
+		return Response{}, ErrInvalidID
+	}
+	if err := s.validateParent(ctx, projectID, parentProjectID); err != nil {
+		return Response{}, err
+	}
+
+	projectType := defaultString(req.ProjectType, DefaultProjectType)
+	lifecycleID := req.LifecycleID
+	if lifecycleID == 0 {
+		lifecycleID = DefaultLifecycleID
+	}
+	isActive := current.IsActive
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
+	proj, err := s.repo.Update(ctx, store.UpdateProjectParams{
+		ID:              projectID,
+		Name:            req.Name,
+		Slug:            req.Slug,
+		Description:     pgtext.From(req.Description),
+		ProjectType:     projectType,
+		Architecture:    pgtext.From(req.Architecture),
+		OwnerTeamID:     ownerTeamID,
+		TechLeadID:      techLeadID,
+		LifecycleID:     lifecycleID,
+		TierID:          pgnum.Int2From(req.TierID),
+		DocsUrl:         pgtext.From(req.DocsURL),
+		DashboardUrl:    pgtext.From(req.DashboardURL),
+		RunbookUrl:      pgtext.From(req.RunbookURL),
+		ParentProjectID: parentProjectID,
+		IsActive:        isActive,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Response{}, ErrNotFound
+		}
+		if isUniqueViolation(err) {
+			return Response{}, ErrSlugTaken
+		}
+		if isForeignKeyViolation(err) {
+			return Response{}, ErrInvalidReference
+		}
+		return Response{}, err
+	}
+
+	return toResponse(proj), nil
+}
+
+func (s *Service) Delete(ctx context.Context, id string) error {
+	projectID, err := uuidutil.Parse(id)
+	if err != nil {
+		return ErrInvalidID
+	}
+
+	if _, err := s.repo.GetByID(ctx, projectID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		return err
+	}
+
+	if inUse, err := s.isProjectInUse(ctx, projectID); err != nil {
+		return err
+	} else if inUse {
+		return ErrProjectInUse
+	}
+
+	rows, err := s.repo.Delete(ctx, projectID)
+	if err != nil {
+		if isForeignKeyViolation(err) {
+			return ErrProjectInUse
+		}
+		return err
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 func (s *Service) AddEnvironment(ctx context.Context, projectID string, req AddEnvironmentRequest) (EnvironmentResponse, error) {
@@ -291,6 +419,76 @@ func defaultString(s, fallback string) string {
 		return fallback
 	}
 	return s
+}
+
+func (s *Service) isProjectInUse(ctx context.Context, projectID pgtype.UUID) (bool, error) {
+	checks := []func(context.Context, pgtype.UUID) (bool, error){
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListChildren(ctx, id)
+			return len(items) > 0, err
+		},
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListEnvironments(ctx, id)
+			return len(items) > 0, err
+		},
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListDependencies(ctx, id)
+			return len(items) > 0, err
+		},
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListDependents(ctx, id)
+			return len(items) > 0, err
+		},
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListServices(ctx, id)
+			return len(items) > 0, err
+		},
+		func(ctx context.Context, id pgtype.UUID) (bool, error) {
+			items, err := s.repo.ListServicesByProject(ctx, id)
+			return len(items) > 0, err
+		},
+	}
+
+	for _, check := range checks {
+		inUse, err := check(ctx, projectID)
+		if err != nil || inUse {
+			return inUse, err
+		}
+	}
+	return false, nil
+}
+
+func (s *Service) validateParent(ctx context.Context, projectID, parentProjectID pgtype.UUID) error {
+	if !parentProjectID.Valid {
+		return nil
+	}
+
+	ancestorID := parentProjectID
+	for ancestorID.Valid {
+		if projectID.Valid && ancestorID.Bytes == projectID.Bytes {
+			return ErrInvalidParent
+		}
+
+		ancestor, err := s.repo.GetByID(ctx, ancestorID)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return ErrInvalidReference
+			}
+			return err
+		}
+		ancestorID = ancestor.ParentProjectID
+	}
+	return nil
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
+func isForeignKeyViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23503"
 }
 
 func toResponse(p store.Project) Response {

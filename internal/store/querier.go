@@ -24,6 +24,7 @@ type Querier interface {
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteProject(ctx context.Context, id pgtype.UUID) (int64, error)
 	DeleteRepo(ctx context.Context, id pgtype.UUID) (int64, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	FailRepo(ctx context.Context, arg FailRepoParams) (Repo, error)
@@ -83,6 +84,7 @@ type Querier interface {
 	// The only mutation ever allowed on a deployment row after creation.
 	UpdateDeploymentStatus(ctx context.Context, arg UpdateDeploymentStatusParams) (Deployment, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error)
 	UpdateRepo(ctx context.Context, arg UpdateRepoParams) (Repo, error)
 }
 

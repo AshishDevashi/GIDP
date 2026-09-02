@@ -22,6 +22,29 @@ type CreateProjectRequest struct {
 	ParentProjectID string `json:"parent_project_id" binding:"omitempty,uuid"`
 }
 
+// UpdateProjectRequest is the payload for updating project metadata.
+type UpdateProjectRequest struct {
+	Name        string `json:"name" binding:"required,max=150"`
+	Slug        string `json:"slug" binding:"required,max=150"`
+	Description string `json:"description"`
+
+	ProjectType  string `json:"project_type"`
+	Architecture string `json:"architecture"`
+
+	OwnerTeamID string `json:"owner_team_id" binding:"required,uuid"`
+	TechLeadID  string `json:"tech_lead_id" binding:"omitempty,uuid"`
+
+	LifecycleID int16 `json:"lifecycle_id"`
+	TierID      int16 `json:"tier_id"`
+
+	DocsURL      string `json:"docs_url"`
+	DashboardURL string `json:"dashboard_url"`
+	RunbookURL   string `json:"runbook_url"`
+
+	ParentProjectID string `json:"parent_project_id" binding:"omitempty,uuid"`
+	IsActive        *bool  `json:"is_active"`
+}
+
 // AddEnvironmentRequest is the payload for registering a deployment environment on a project.
 type AddEnvironmentRequest struct {
 	Environment string `json:"environment" binding:"required,max=50"`

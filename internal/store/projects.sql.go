@@ -79,6 +79,19 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 	return i, err
 }
 
+const deleteProject = `-- name: DeleteProject :execrows
+DELETE FROM projects
+WHERE id = $1
+`
+
+func (q *Queries) DeleteProject(ctx context.Context, id pgtype.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteProject, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getProjectByID = `-- name: GetProjectByID :one
 SELECT id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at FROM projects
 WHERE id = $1
@@ -226,4 +239,84 @@ func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateProject = `-- name: UpdateProject :one
+UPDATE projects
+SET name = $2,
+    slug = $3,
+    description = $4,
+    project_type = $5,
+    architecture = $6,
+    owner_team_id = $7,
+    tech_lead_id = $8,
+    lifecycle_id = $9,
+    tier_id = $10,
+    docs_url = $11,
+    dashboard_url = $12,
+    runbook_url = $13,
+    parent_project_id = $14,
+    is_active = $15,
+    updated_at = now()
+WHERE id = $1
+RETURNING id, name, slug, description, project_type, architecture, owner_team_id, tech_lead_id, lifecycle_id, tier_id, docs_url, dashboard_url, runbook_url, parent_project_id, is_active, created_at, updated_at
+`
+
+type UpdateProjectParams struct {
+	ID              pgtype.UUID `json:"id"`
+	Name            string      `json:"name"`
+	Slug            string      `json:"slug"`
+	Description     pgtype.Text `json:"description"`
+	ProjectType     string      `json:"project_type"`
+	Architecture    pgtype.Text `json:"architecture"`
+	OwnerTeamID     pgtype.UUID `json:"owner_team_id"`
+	TechLeadID      pgtype.UUID `json:"tech_lead_id"`
+	LifecycleID     int16       `json:"lifecycle_id"`
+	TierID          pgtype.Int2 `json:"tier_id"`
+	DocsUrl         pgtype.Text `json:"docs_url"`
+	DashboardUrl    pgtype.Text `json:"dashboard_url"`
+	RunbookUrl      pgtype.Text `json:"runbook_url"`
+	ParentProjectID pgtype.UUID `json:"parent_project_id"`
+	IsActive        bool        `json:"is_active"`
+}
+
+func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error) {
+	row := q.db.QueryRow(ctx, updateProject,
+		arg.ID,
+		arg.Name,
+		arg.Slug,
+		arg.Description,
+		arg.ProjectType,
+		arg.Architecture,
+		arg.OwnerTeamID,
+		arg.TechLeadID,
+		arg.LifecycleID,
+		arg.TierID,
+		arg.DocsUrl,
+		arg.DashboardUrl,
+		arg.RunbookUrl,
+		arg.ParentProjectID,
+		arg.IsActive,
+	)
+	var i Project
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Description,
+		&i.ProjectType,
+		&i.Architecture,
+		&i.OwnerTeamID,
+		&i.TechLeadID,
+		&i.LifecycleID,
+		&i.TierID,
+		&i.DocsUrl,
+		&i.DashboardUrl,
+		&i.RunbookUrl,
+		&i.ParentProjectID,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

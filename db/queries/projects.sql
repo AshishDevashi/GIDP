@@ -28,3 +28,27 @@ ORDER BY created_at;
 SELECT * FROM projects
 WHERE parent_project_id = $1
 ORDER BY created_at;
+
+-- name: UpdateProject :one
+UPDATE projects
+SET name = $2,
+    slug = $3,
+    description = $4,
+    project_type = $5,
+    architecture = $6,
+    owner_team_id = $7,
+    tech_lead_id = $8,
+    lifecycle_id = $9,
+    tier_id = $10,
+    docs_url = $11,
+    dashboard_url = $12,
+    runbook_url = $13,
+    parent_project_id = $14,
+    is_active = $15,
+    updated_at = now()
+WHERE id = $1
+RETURNING *;
+
+-- name: DeleteProject :execrows
+DELETE FROM projects
+WHERE id = $1;
