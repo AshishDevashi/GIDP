@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	ActivateRepo(ctx context.Context, arg ActivateRepoParams) (Repo, error)
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
+	CreateRegistry(ctx context.Context, arg CreateRegistryParams) (Registry, error)
 	CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -20,6 +21,8 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	FailRepo(ctx context.Context, arg FailRepoParams) (Repo, error)
 	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
+	GetRegistryByID(ctx context.Context, id pgtype.UUID) (Registry, error)
+	GetRegistryByName(ctx context.Context, arg GetRegistryByNameParams) (Registry, error)
 	GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
 	GetRepoTemplateBySlug(ctx context.Context, slug string) (RepoTemplate, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
@@ -29,6 +32,8 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	ListLanguages(ctx context.Context) ([]Language, error)
+	ListRegistries(ctx context.Context) ([]Registry, error)
+	ListRegistryProviders(ctx context.Context) ([]RegistryProvider, error)
 	ListRepoProviders(ctx context.Context) ([]RepoProvider, error)
 	ListRepoTemplates(ctx context.Context) ([]RepoTemplate, error)
 	ListRepos(ctx context.Context) ([]Repo, error)
@@ -37,7 +42,9 @@ type Querier interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	MarkRepoCreating(ctx context.Context, id pgtype.UUID) (Repo, error)
 	RemoveTeamMember(ctx context.Context, id pgtype.UUID) error
+	SoftDeleteRegistry(ctx context.Context, id pgtype.UUID) (int64, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
+	UpdateRegistry(ctx context.Context, arg UpdateRegistryParams) (Registry, error)
 	UpdateRepo(ctx context.Context, arg UpdateRepoParams) (Repo, error)
 }
 

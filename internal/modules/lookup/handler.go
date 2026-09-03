@@ -25,6 +25,7 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	lookups.GET("/repo-providers", m.repoProviders)
 	lookups.GET("/languages", m.languages)
 	lookups.GET("/repo-templates", m.repoTemplates)
+	lookups.GET("/registry-providers", m.registryProviders)
 }
 
 func (m *Module) all(c *gin.Context) {
@@ -56,6 +57,15 @@ func (m *Module) languages(c *gin.Context) {
 
 func (m *Module) repoTemplates(c *gin.Context) {
 	items, err := m.service.RepoTemplates(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.JSON(c, http.StatusOK, items)
+}
+
+func (m *Module) registryProviders(c *gin.Context) {
+	items, err := m.service.RegistryProviders(c.Request.Context())
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

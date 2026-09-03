@@ -14,6 +14,27 @@ type Language struct {
 	Label pgtype.Text `json:"label"`
 }
 
+type Registry struct {
+	ID          pgtype.UUID        `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	ProviderID  int16              `json:"provider_id"`
+	Namespace   string             `json:"namespace"`
+	RegistryUrl pgtype.Text        `json:"registry_url"`
+	Visibility  string             `json:"visibility"`
+	Status      string             `json:"status"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type RegistryProvider struct {
+	ID    int16       `json:"id"`
+	Code  string      `json:"code"`
+	Label pgtype.Text `json:"label"`
+}
+
 type Repo struct {
 	ID            pgtype.UUID        `json:"id"`
 	Name          string             `json:"name"`

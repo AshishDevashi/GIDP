@@ -34,6 +34,31 @@ func (q *Queries) ListLanguages(ctx context.Context) ([]Language, error) {
 	return items, nil
 }
 
+const listRegistryProviders = `-- name: ListRegistryProviders :many
+SELECT id, code, label FROM registry_providers
+ORDER BY id
+`
+
+func (q *Queries) ListRegistryProviders(ctx context.Context) ([]RegistryProvider, error) {
+	rows, err := q.db.Query(ctx, listRegistryProviders)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RegistryProvider
+	for rows.Next() {
+		var i RegistryProvider
+		if err := rows.Scan(&i.ID, &i.Code, &i.Label); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listRepoProviders = `-- name: ListRepoProviders :many
 SELECT id, code FROM repo_providers
 ORDER BY id

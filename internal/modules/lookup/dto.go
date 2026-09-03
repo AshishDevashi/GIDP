@@ -18,7 +18,8 @@ type RepoTemplateItem struct {
 
 // AllLookupsResponse is the public payload for all lookup tables in a single API response.
 type AllLookupsResponse struct {
-	RepoProviders []Item             `json:"repo_providers"`
-	Languages     []Item             `json:"languages"`
-	RepoTemplates []RepoTemplateItem `json:"repo_templates"`
+	RepoProviders     []Item             `json:"repo_providers"`
+	Languages         []Item             `json:"languages"`
+	RepoTemplates     []RepoTemplateItem `json:"repo_templates"`
+	RegistryProviders []Item             `json:"registry_providers"`
 }

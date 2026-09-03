@@ -11,6 +11,7 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
+	"github.com/AshishDevashi/GIDP/internal/modules/registry"
 	"github.com/AshishDevashi/GIDP/internal/modules/repo"
 	"github.com/AshishDevashi/GIDP/internal/modules/team"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
@@ -65,6 +66,7 @@ func (s *Server) registerModules() {
 	user.NewModule(s.db).RegisterRoutes(protected)
 	team.NewModule(s.db).RegisterRoutes(protected)
 	repo.NewModule(s.db, s.cfg.GitHubToken).RegisterRoutes(protected)
+	registry.NewModule(s.db, s.cfg.DockerHubUsername, s.cfg.DockerHubToken, s.cfg.DockerHubNamespace).RegisterRoutes(protected)
 	lookup.NewModule(s.db).RegisterRoutes(protected)
 }
 

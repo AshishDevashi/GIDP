@@ -54,6 +54,18 @@ func (s *Service) RepoTemplates(ctx context.Context) ([]RepoTemplateItem, error)
 	return items, nil
 }
 
+func (s *Service) RegistryProviders(ctx context.Context) ([]Item, error) {
+	rows, err := s.repo.ListRegistryProviders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]Item, len(rows))
+	for i, r := range rows {
+		items[i] = Item{ID: r.ID, Code: r.Code, Label: pgtext.To(r.Label)}
+	}
+	return items, nil
+}
+
 func (s *Service) All(ctx context.Context) (AllLookupsResponse, error) {
 	repoProviders, err := s.RepoProviders(ctx)
 	if err != nil {
@@ -67,19 +79,25 @@ func (s *Service) All(ctx context.Context) (AllLookupsResponse, error) {
 	if err != nil {
 		return AllLookupsResponse{}, err
 	}
+	registryProviders, err := s.RegistryProviders(ctx)
+	if err != nil {
+		return AllLookupsResponse{}, err
+	}
 
-	return BuildAllLookupsPayload(repoProviders, languages, repoTemplates), nil
+	return BuildAllLookupsPayload(repoProviders, languages, repoTemplates, registryProviders), nil
 }
 
 func BuildAllLookupsPayload(
 	repoProviders []Item,
 	languages []Item,
 	repoTemplates []RepoTemplateItem,
+	registryProviders []Item,
 ) AllLookupsResponse {
 	return AllLookupsResponse{
-		RepoProviders: repoProviders,
-		Languages:     languages,
-		RepoTemplates: repoTemplates,
+		RepoProviders:     repoProviders,
+		Languages:         languages,
+		RepoTemplates:     repoTemplates,
+		RegistryProviders: registryProviders,
 	}
 }
 

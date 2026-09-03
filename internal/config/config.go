@@ -13,6 +13,10 @@ type Config struct {
 	JWTSecret   string
 	JWTTTL      time.Duration
 	GitHubToken string
+
+	DockerHubUsername  string
+	DockerHubToken     string
+	DockerHubNamespace string
 }
 
 // Load reads configuration from environment variables, applying sane defaults.
@@ -24,6 +28,10 @@ func Load() *Config {
 		JWTSecret:   getEnv("JWT_SECRET", "dev-secret-change-me"),
 		JWTTTL:      getEnvDuration("JWT_TTL", 24*time.Hour),
 		GitHubToken: getEnv("GITHUB_TOKEN", ""),
+
+		DockerHubUsername:  getEnv("DOCKERHUB_USERNAME", ""),
+		DockerHubToken:     getEnv("DOCKERHUB_TOKEN", ""),
+		DockerHubNamespace: getEnv("DOCKERHUB_NAMESPACE", ""),
 	}
 }
 
