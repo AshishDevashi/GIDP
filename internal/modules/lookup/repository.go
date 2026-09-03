@@ -16,18 +16,6 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{queries: store.New(pool)}
 }
 
-func (r *Repository) ListLifecycles(ctx context.Context) ([]store.Lifecycle, error) {
-	return r.queries.ListLifecycles(ctx)
-}
-
-func (r *Repository) ListTiers(ctx context.Context) ([]store.Tier, error) {
-	return r.queries.ListTiers(ctx)
-}
-
-func (r *Repository) ListServiceTypes(ctx context.Context) ([]store.ServiceType, error) {
-	return r.queries.ListServiceTypes(ctx)
-}
-
 func (r *Repository) ListRepoProviders(ctx context.Context) ([]store.RepoProvider, error) {
 	return r.queries.ListRepoProviders(ctx)
 }

@@ -16,43 +16,6 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Lifecycles(ctx context.Context) ([]Item, error) {
-	rows, err := s.repo.ListLifecycles(ctx)
-	if err != nil {
-		return nil, err
-	}
-	items := make([]Item, len(rows))
-	for i, r := range rows {
-		items[i] = Item{ID: r.ID, Code: r.Code, Label: pgtext.To(r.Label)}
-	}
-	return items, nil
-}
-
-func (s *Service) Tiers(ctx context.Context) ([]TierItem, error) {
-	rows, err := s.repo.ListTiers(ctx)
-	if err != nil {
-		return nil, err
-	}
-	items := make([]TierItem, len(rows))
-	for i, r := range rows {
-		items[i] = TierItem{
-			ID:           r.ID,
-			Code:         r.Code,
-			Description:  pgtext.To(r.Description),
-			PagingPolicy: pgtext.To(r.PagingPolicy),
-		}
-	}
-	return items, nil
-}
-
-func (s *Service) ServiceTypes(ctx context.Context) ([]Item, error) {
-	rows, err := s.repo.ListServiceTypes(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return toItems(rows, func(r store.ServiceType) Item { return Item{ID: r.ID, Code: r.Code} }), nil
-}
-
 func (s *Service) RepoProviders(ctx context.Context) ([]Item, error) {
 	rows, err := s.repo.ListRepoProviders(ctx)
 	if err != nil {
@@ -92,18 +55,6 @@ func (s *Service) RepoTemplates(ctx context.Context) ([]RepoTemplateItem, error)
 }
 
 func (s *Service) All(ctx context.Context) (AllLookupsResponse, error) {
-	lifecycles, err := s.Lifecycles(ctx)
-	if err != nil {
-		return AllLookupsResponse{}, err
-	}
-	tiers, err := s.Tiers(ctx)
-	if err != nil {
-		return AllLookupsResponse{}, err
-	}
-	serviceTypes, err := s.ServiceTypes(ctx)
-	if err != nil {
-		return AllLookupsResponse{}, err
-	}
 	repoProviders, err := s.RepoProviders(ctx)
 	if err != nil {
 		return AllLookupsResponse{}, err
@@ -117,21 +68,15 @@ func (s *Service) All(ctx context.Context) (AllLookupsResponse, error) {
 		return AllLookupsResponse{}, err
 	}
 
-	return BuildAllLookupsPayload(lifecycles, tiers, serviceTypes, repoProviders, languages, repoTemplates), nil
+	return BuildAllLookupsPayload(repoProviders, languages, repoTemplates), nil
 }
 
 func BuildAllLookupsPayload(
-	lifecycles []Item,
-	tiers []TierItem,
-	serviceTypes []Item,
 	repoProviders []Item,
 	languages []Item,
 	repoTemplates []RepoTemplateItem,
 ) AllLookupsResponse {
 	return AllLookupsResponse{
-		Lifecycles:    lifecycles,
-		Tiers:         tiers,
-		ServiceTypes:  serviceTypes,
 		RepoProviders: repoProviders,
 		Languages:     languages,
 		RepoTemplates: repoTemplates,

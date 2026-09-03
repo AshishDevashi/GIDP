@@ -12,79 +12,32 @@ import (
 
 type Querier interface {
 	ActivateRepo(ctx context.Context, arg ActivateRepoParams) (Repo, error)
-	AddProjectDependency(ctx context.Context, arg AddProjectDependencyParams) (ProjectDependency, error)
-	AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) (ProjectEnvironment, error)
-	AddServiceDependency(ctx context.Context, arg AddServiceDependencyParams) (ServiceDependency, error)
-	AddServiceEnvironment(ctx context.Context, arg AddServiceEnvironmentParams) (ServiceEnvironment, error)
-	AddServiceTag(ctx context.Context, arg AddServiceTagParams) error
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
-	CreateDeployment(ctx context.Context, arg CreateDeploymentParams) (Deployment, error)
-	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, error)
-	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteProject(ctx context.Context, id pgtype.UUID) (int64, error)
 	DeleteRepo(ctx context.Context, id pgtype.UUID) (int64, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	FailRepo(ctx context.Context, arg FailRepoParams) (Repo, error)
 	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
-	// Latest successful deployment for a service+environment, i.e. what's actually running.
-	GetCurrentDeployment(ctx context.Context, arg GetCurrentDeploymentParams) (Deployment, error)
-	GetDeploymentByID(ctx context.Context, id pgtype.UUID) (Deployment, error)
-	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
-	GetProjectBySlug(ctx context.Context, slug string) (Project, error)
-	GetProjectEnvironment(ctx context.Context, arg GetProjectEnvironmentParams) (ProjectEnvironment, error)
 	GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
 	GetRepoTemplateBySlug(ctx context.Context, slug string) (RepoTemplate, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
-	GetServiceByID(ctx context.Context, id pgtype.UUID) (Service, error)
-	GetServiceBySlug(ctx context.Context, slug string) (Service, error)
-	GetServiceEnvironment(ctx context.Context, arg GetServiceEnvironmentParams) (ServiceEnvironment, error)
 	GetTeamByID(ctx context.Context, id pgtype.UUID) (Team, error)
 	GetTeamBySlug(ctx context.Context, slug string) (Team, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	LinkProjectService(ctx context.Context, arg LinkProjectServiceParams) error
-	ListChildProjects(ctx context.Context, parentProjectID pgtype.UUID) ([]Project, error)
-	// Projects that depend on the given project (impact check before deletion).
-	ListDependentProjects(ctx context.Context, dependsOnProjectID pgtype.UUID) ([]ProjectDependency, error)
-	// Services that depend on the given service (impact check before deletion).
-	ListDependentServices(ctx context.Context, dependsOnServiceID pgtype.UUID) ([]ServiceDependency, error)
-	ListDeploymentsByService(ctx context.Context, serviceID pgtype.UUID) ([]Deployment, error)
-	ListDeploymentsByServiceEnvironment(ctx context.Context, arg ListDeploymentsByServiceEnvironmentParams) ([]Deployment, error)
 	ListLanguages(ctx context.Context) ([]Language, error)
-	ListLifecycles(ctx context.Context) ([]Lifecycle, error)
-	// Projects that the given project depends on.
-	ListProjectDependencies(ctx context.Context, projectID pgtype.UUID) ([]ProjectDependency, error)
-	ListProjectEnvironments(ctx context.Context, projectID pgtype.UUID) ([]ProjectEnvironment, error)
-	ListProjectServices(ctx context.Context, projectID pgtype.UUID) ([]ProjectService, error)
-	ListProjects(ctx context.Context) ([]Project, error)
 	ListRepoProviders(ctx context.Context) ([]RepoProvider, error)
 	ListRepoTemplates(ctx context.Context) ([]RepoTemplate, error)
 	ListRepos(ctx context.Context) ([]Repo, error)
-	// Services that the given service depends on.
-	ListServiceDependencies(ctx context.Context, serviceID pgtype.UUID) ([]ServiceDependency, error)
-	ListServiceEnvironments(ctx context.Context, serviceID pgtype.UUID) ([]ServiceEnvironment, error)
-	ListServiceTags(ctx context.Context, serviceID pgtype.UUID) ([]ServiceTag, error)
-	ListServiceTypes(ctx context.Context) ([]ServiceType, error)
-	ListServices(ctx context.Context) ([]Service, error)
-	ListServicesByProject(ctx context.Context, projectID pgtype.UUID) ([]Service, error)
 	ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]TeamMember, error)
 	ListTeams(ctx context.Context) ([]Team, error)
-	ListTiers(ctx context.Context) ([]Tier, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	MarkRepoCreating(ctx context.Context, id pgtype.UUID) (Repo, error)
-	RemoveProjectDependency(ctx context.Context, arg RemoveProjectDependencyParams) error
-	RemoveServiceDependency(ctx context.Context, arg RemoveServiceDependencyParams) error
-	RemoveServiceTag(ctx context.Context, arg RemoveServiceTagParams) error
 	RemoveTeamMember(ctx context.Context, id pgtype.UUID) error
-	UnlinkProjectService(ctx context.Context, arg UnlinkProjectServiceParams) error
-	// The only mutation ever allowed on a deployment row after creation.
-	UpdateDeploymentStatus(ctx context.Context, arg UpdateDeploymentStatusParams) (Deployment, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
-	UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error)
 	UpdateRepo(ctx context.Context, arg UpdateRepoParams) (Repo, error)
 }
 

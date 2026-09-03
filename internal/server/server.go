@@ -9,12 +9,9 @@ import (
 
 	"github.com/AshishDevashi/GIDP/internal/config"
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
-	"github.com/AshishDevashi/GIDP/internal/modules/deployment"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
-	"github.com/AshishDevashi/GIDP/internal/modules/project"
 	"github.com/AshishDevashi/GIDP/internal/modules/repo"
-	"github.com/AshishDevashi/GIDP/internal/modules/service"
 	"github.com/AshishDevashi/GIDP/internal/modules/team"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
 	"github.com/gin-contrib/cors"
@@ -67,10 +64,7 @@ func (s *Server) registerModules() {
 	protected.Use(authModule.RequireAuth())
 	user.NewModule(s.db).RegisterRoutes(protected)
 	team.NewModule(s.db).RegisterRoutes(protected)
-	project.NewModule(s.db).RegisterRoutes(protected)
 	repo.NewModule(s.db, s.cfg.GitHubToken).RegisterRoutes(protected)
-	service.NewModule(s.db).RegisterRoutes(protected)
-	deployment.NewModule(s.db).RegisterRoutes(protected)
 	lookup.NewModule(s.db).RegisterRoutes(protected)
 }
 

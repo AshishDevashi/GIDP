@@ -22,9 +22,6 @@ func NewModule(pool *pgxpool.Pool) *Module {
 func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	lookups := rg.Group("/lookups")
 	lookups.GET("", m.all)
-	lookups.GET("/lifecycles", m.lifecycles)
-	lookups.GET("/tiers", m.tiers)
-	lookups.GET("/service-types", m.serviceTypes)
 	lookups.GET("/repo-providers", m.repoProviders)
 	lookups.GET("/languages", m.languages)
 	lookups.GET("/repo-templates", m.repoTemplates)
@@ -32,33 +29,6 @@ func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 
 func (m *Module) all(c *gin.Context) {
 	items, err := m.service.All(c.Request.Context())
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.JSON(c, http.StatusOK, items)
-}
-
-func (m *Module) lifecycles(c *gin.Context) {
-	items, err := m.service.Lifecycles(c.Request.Context())
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.JSON(c, http.StatusOK, items)
-}
-
-func (m *Module) tiers(c *gin.Context) {
-	items, err := m.service.Tiers(c.Request.Context())
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	response.JSON(c, http.StatusOK, items)
-}
-
-func (m *Module) serviceTypes(c *gin.Context) {
-	items, err := m.service.ServiceTypes(c.Request.Context())
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

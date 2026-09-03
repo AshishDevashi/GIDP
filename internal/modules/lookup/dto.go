@@ -7,14 +7,6 @@ type Item struct {
 	Label string `json:"label,omitempty"`
 }
 
-// TierItem is the public representation of a project tier, including its paging policy.
-type TierItem struct {
-	ID           int16  `json:"id"`
-	Code         string `json:"code"`
-	Description  string `json:"description,omitempty"`
-	PagingPolicy string `json:"paging_policy,omitempty"`
-}
-
 // RepoTemplateItem is the public representation of a predefined repository template.
 type RepoTemplateItem struct {
 	ID            int16  `json:"id"`
@@ -26,9 +18,6 @@ type RepoTemplateItem struct {
 
 // AllLookupsResponse is the public payload for all lookup tables in a single API response.
 type AllLookupsResponse struct {
-	Lifecycles    []Item             `json:"lifecycles"`
-	Tiers         []TierItem         `json:"tiers"`
-	ServiceTypes  []Item             `json:"service_types"`
 	RepoProviders []Item             `json:"repo_providers"`
 	Languages     []Item             `json:"languages"`
 	RepoTemplates []RepoTemplateItem `json:"repo_templates"`

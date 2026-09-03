@@ -34,31 +34,6 @@ func (q *Queries) ListLanguages(ctx context.Context) ([]Language, error) {
 	return items, nil
 }
 
-const listLifecycles = `-- name: ListLifecycles :many
-SELECT id, code, label FROM lifecycles
-ORDER BY id
-`
-
-func (q *Queries) ListLifecycles(ctx context.Context) ([]Lifecycle, error) {
-	rows, err := q.db.Query(ctx, listLifecycles)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Lifecycle
-	for rows.Next() {
-		var i Lifecycle
-		if err := rows.Scan(&i.ID, &i.Code, &i.Label); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listRepoProviders = `-- name: ListRepoProviders :many
 SELECT id, code FROM repo_providers
 ORDER BY id
@@ -107,61 +82,6 @@ func (q *Queries) ListRepoTemplates(ctx context.Context) ([]RepoTemplate, error)
 			&i.TemplateRepo,
 			&i.IsActive,
 			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listServiceTypes = `-- name: ListServiceTypes :many
-SELECT id, code FROM service_types
-ORDER BY id
-`
-
-func (q *Queries) ListServiceTypes(ctx context.Context) ([]ServiceType, error) {
-	rows, err := q.db.Query(ctx, listServiceTypes)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ServiceType
-	for rows.Next() {
-		var i ServiceType
-		if err := rows.Scan(&i.ID, &i.Code); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listTiers = `-- name: ListTiers :many
-SELECT id, code, description, paging_policy FROM tiers
-ORDER BY id
-`
-
-func (q *Queries) ListTiers(ctx context.Context) ([]Tier, error) {
-	rows, err := q.db.Query(ctx, listTiers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Tier
-	for rows.Next() {
-		var i Tier
-		if err := rows.Scan(
-			&i.ID,
-			&i.Code,
-			&i.Description,
-			&i.PagingPolicy,
 		); err != nil {
 			return nil, err
 		}

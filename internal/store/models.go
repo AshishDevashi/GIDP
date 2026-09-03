@@ -8,81 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Deployment struct {
-	ID                         pgtype.UUID        `json:"id"`
-	ServiceID                  pgtype.UUID        `json:"service_id"`
-	Environment                string             `json:"environment"`
-	ImageTag                   string             `json:"image_tag"`
-	PreviousImageTag           pgtype.Text        `json:"previous_image_tag"`
-	GitCommitSha               pgtype.Text        `json:"git_commit_sha"`
-	GitBranch                  pgtype.Text        `json:"git_branch"`
-	TriggeredByUserID          pgtype.UUID        `json:"triggered_by_user_id"`
-	TriggerType                string             `json:"trigger_type"`
-	CiRunUrl                   pgtype.Text        `json:"ci_run_url"`
-	DeployStrategy             string             `json:"deploy_strategy"`
-	GitopsCommitSha            pgtype.Text        `json:"gitops_commit_sha"`
-	Status                     string             `json:"status"`
-	StartedAt                  pgtype.Timestamptz `json:"started_at"`
-	CompletedAt                pgtype.Timestamptz `json:"completed_at"`
-	FailureReason              pgtype.Text        `json:"failure_reason"`
-	IsRollback                 bool               `json:"is_rollback"`
-	RolledBackFromDeploymentID pgtype.UUID        `json:"rolled_back_from_deployment_id"`
-	CreatedAt                  pgtype.Timestamptz `json:"created_at"`
-}
-
 type Language struct {
 	ID    int16       `json:"id"`
 	Code  string      `json:"code"`
 	Label pgtype.Text `json:"label"`
-}
-
-type Lifecycle struct {
-	ID    int16       `json:"id"`
-	Code  string      `json:"code"`
-	Label pgtype.Text `json:"label"`
-}
-
-type Project struct {
-	ID              pgtype.UUID        `json:"id"`
-	Name            string             `json:"name"`
-	Slug            string             `json:"slug"`
-	Description     pgtype.Text        `json:"description"`
-	ProjectType     string             `json:"project_type"`
-	Architecture    pgtype.Text        `json:"architecture"`
-	OwnerTeamID     pgtype.UUID        `json:"owner_team_id"`
-	TechLeadID      pgtype.UUID        `json:"tech_lead_id"`
-	LifecycleID     int16              `json:"lifecycle_id"`
-	TierID          pgtype.Int2        `json:"tier_id"`
-	DocsUrl         pgtype.Text        `json:"docs_url"`
-	DashboardUrl    pgtype.Text        `json:"dashboard_url"`
-	RunbookUrl      pgtype.Text        `json:"runbook_url"`
-	ParentProjectID pgtype.UUID        `json:"parent_project_id"`
-	IsActive        bool               `json:"is_active"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-}
-
-type ProjectDependency struct {
-	ID                 pgtype.UUID        `json:"id"`
-	ProjectID          pgtype.UUID        `json:"project_id"`
-	DependsOnProjectID pgtype.UUID        `json:"depends_on_project_id"`
-	DependencyType     string             `json:"dependency_type"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectEnvironment struct {
-	ID          pgtype.UUID `json:"id"`
-	ProjectID   pgtype.UUID `json:"project_id"`
-	Environment string      `json:"environment"`
-	ClusterName pgtype.Text `json:"cluster_name"`
-	Namespace   pgtype.Text `json:"namespace"`
-	Url         pgtype.Text `json:"url"`
-	Replicas    int32       `json:"replicas"`
-}
-
-type ProjectService struct {
-	ProjectID pgtype.UUID `json:"project_id"`
-	ServiceID pgtype.UUID `json:"service_id"`
 }
 
 type Repo struct {
@@ -126,71 +55,6 @@ type Role struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
-type Service struct {
-	ID              pgtype.UUID        `json:"id"`
-	Name            string             `json:"name"`
-	Slug            string             `json:"slug"`
-	Description     pgtype.Text        `json:"description"`
-	ServiceTypeID   int16              `json:"service_type_id"`
-	LifecycleID     pgtype.Int2        `json:"lifecycle_id"`
-	TierID          pgtype.Int2        `json:"tier_id"`
-	ProjectID       pgtype.UUID        `json:"project_id"`
-	OwnerTeamID     pgtype.UUID        `json:"owner_team_id"`
-	TechLeadID      pgtype.UUID        `json:"tech_lead_id"`
-	RepoUrl         string             `json:"repo_url"`
-	RepoProviderID  pgtype.Int2        `json:"repo_provider_id"`
-	DefaultBranch   string             `json:"default_branch"`
-	LanguageID      pgtype.Int2        `json:"language_id"`
-	Framework       pgtype.Text        `json:"framework"`
-	DockerfilePath  string             `json:"dockerfile_path"`
-	RegistryImage   pgtype.Text        `json:"registry_image"`
-	CiPipelineUrl   pgtype.Text        `json:"ci_pipeline_url"`
-	GitopsRepoPath  pgtype.Text        `json:"gitops_repo_path"`
-	K8sResourceKind string             `json:"k8s_resource_kind"`
-	Port            pgtype.Int4        `json:"port"`
-	HealthCheckPath string             `json:"health_check_path"`
-	InternalUrl     pgtype.Text        `json:"internal_url"`
-	ExternalUrl     pgtype.Text        `json:"external_url"`
-	ApiSpecUrl      pgtype.Text        `json:"api_spec_url"`
-	DashboardUrl    pgtype.Text        `json:"dashboard_url"`
-	RunbookUrl      pgtype.Text        `json:"runbook_url"`
-	SloTarget       pgtype.Numeric     `json:"slo_target"`
-	IsActive        bool               `json:"is_active"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-}
-
-type ServiceDependency struct {
-	ServiceID          pgtype.UUID `json:"service_id"`
-	DependsOnServiceID pgtype.UUID `json:"depends_on_service_id"`
-	DependencyType     pgtype.Text `json:"dependency_type"`
-	IsCritical         bool        `json:"is_critical"`
-}
-
-type ServiceEnvironment struct {
-	ID              pgtype.UUID `json:"id"`
-	ServiceID       pgtype.UUID `json:"service_id"`
-	Environment     string      `json:"environment"`
-	ClusterName     pgtype.Text `json:"cluster_name"`
-	Namespace       pgtype.Text `json:"namespace"`
-	ReplicasMin     int32       `json:"replicas_min"`
-	ReplicasMax     int32       `json:"replicas_max"`
-	CpuRequest      pgtype.Text `json:"cpu_request"`
-	MemoryRequest   pgtype.Text `json:"memory_request"`
-	CurrentImageTag pgtype.Text `json:"current_image_tag"`
-	Url             pgtype.Text `json:"url"`
-}
-
-type ServiceTag struct {
-	ServiceID pgtype.UUID `json:"service_id"`
-	Tag       string      `json:"tag"`
-}
-
-type ServiceType struct {
-	ID   int16  `json:"id"`
-	Code string `json:"code"`
-}
-
 type Team struct {
 	ID          pgtype.UUID        `json:"id"`
 	Name        string             `json:"name"`
@@ -211,13 +75,6 @@ type TeamMember struct {
 	LeftAt     pgtype.Timestamptz `json:"left_at"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-}
-
-type Tier struct {
-	ID           int16       `json:"id"`
-	Code         string      `json:"code"`
-	Description  pgtype.Text `json:"description"`
-	PagingPolicy pgtype.Text `json:"paging_policy"`
 }
 
 type User struct {

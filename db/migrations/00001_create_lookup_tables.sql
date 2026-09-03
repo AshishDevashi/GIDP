@@ -11,45 +11,6 @@ INSERT INTO roles (name)
 VALUES ('admin'), ('manager'), ('developer')
 ON CONFLICT (name) DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS lifecycles (
-    id    SMALLINT PRIMARY KEY,
-    code  VARCHAR(50) UNIQUE NOT NULL,
-    label VARCHAR(100)
-);
-
-INSERT INTO lifecycles (id, code, label) VALUES
-    (1, 'experimental', 'Experimental'),
-    (2, 'production', 'Production'),
-    (3, 'deprecated', 'Deprecated'),
-    (4, 'retired', 'Retired')
-ON CONFLICT (id) DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS tiers (
-    id            SMALLINT PRIMARY KEY,
-    code          VARCHAR(20) UNIQUE NOT NULL,
-    description   TEXT,
-    paging_policy VARCHAR(50)
-);
-
-INSERT INTO tiers (id, code, description, paging_policy) VALUES
-    (1, 'tier-1', 'Business critical', 'immediate'),
-    (2, 'tier-2', 'Important', 'business_hours'),
-    (3, 'tier-3', 'Non critical', 'none')
-ON CONFLICT (id) DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS service_types (
-    id   SMALLINT PRIMARY KEY,
-    code VARCHAR(50) UNIQUE NOT NULL
-);
-
-INSERT INTO service_types (id, code) VALUES
-    (1, 'backend'),
-    (2, 'frontend'),
-    (3, 'worker'),
-    (4, 'cron_job'),
-    (5, 'library')
-ON CONFLICT (id) DO NOTHING;
-
 CREATE TABLE IF NOT EXISTS repo_providers (
     id   SMALLINT PRIMARY KEY,
     code VARCHAR(50) UNIQUE NOT NULL
@@ -97,7 +58,4 @@ ON CONFLICT (id) DO NOTHING;
 DROP TABLE IF EXISTS repo_templates;
 DROP TABLE IF EXISTS languages;
 DROP TABLE IF EXISTS repo_providers;
-DROP TABLE IF EXISTS service_types;
-DROP TABLE IF EXISTS tiers;
-DROP TABLE IF EXISTS lifecycles;
 DROP TABLE IF EXISTS roles;
