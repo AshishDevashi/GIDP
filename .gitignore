@@ -26,3 +26,13 @@ build-errors.log
 *.test
 *.out
 vendor/
+
+# Terraform runtime state (never commit: contains provisioned resource details)
+deploy/terraform/.workspaces/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Generated SSH key pairs for provisioned instances
+deploy/keys/

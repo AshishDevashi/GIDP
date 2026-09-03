@@ -1,0 +1,77 @@
+#!/bin/bash
+# Rendered by internal/modules/dbinstance/userdata.go and run by cloud-init on first boot.
+set -euo pipefail
+exec > >(tee -a /var/log/gidp-bootstrap.log) 2>&1
+
+REGION="{{ .Region }}"
+SECRET_NAME="{{ .AdminSecretName }}"
+ADMIN_USER="{{ .AdminUsername }}"
+POSTGRES_IMAGE="{{ .PostgresImage }}"
+POSTGRES_PORT="{{ .PostgresPort }}"
+DEVICE_HINT="{{ .DataDeviceName }}"
+MOUNT_POINT="{{ .DataMountPoint }}"
+CONTAINER_NAME="{{ .ContainerName }}"
+ENV_FILE=/etc/gidp-postgres.env
+
+dnf install -y docker
+if ! command -v aws >/dev/null 2>&1; then
+  dnf install -y awscli-2 || dnf install -y awscli
+fi
+systemctl enable --now docker
+
+# The data volume is attached after the instance launches and Nitro renames
+# /dev/sdX, so resolve the real block device with a bounded wait.
+DEVICE=""
+for _ in $(seq 1 60); do
+  for candidate in "$DEVICE_HINT" /dev/xvdf /dev/nvme1n1; do
+    if [ -b "$candidate" ]; then
+      DEVICE="$(readlink -f "$candidate")"
+      break
+    fi
+  done
+  [ -n "$DEVICE" ] && break
+  sleep 5
+done
+if [ -z "$DEVICE" ]; then
+  echo "data volume did not appear in time" >&2
+  exit 1
+fi
+
+# Only format when the volume has no filesystem, otherwise a replaced instance
+# would wipe the existing PostgreSQL data directory.
+if ! blkid "$DEVICE" >/dev/null 2>&1; then
+  mkfs -t xfs "$DEVICE"
+fi
+
+mkdir -p "$MOUNT_POINT"
+DEVICE_UUID="$(blkid -s UUID -o value "$DEVICE")"
+if ! grep -q "$DEVICE_UUID" /etc/fstab; then
+  echo "UUID=$DEVICE_UUID $MOUNT_POINT xfs defaults,nofail 0 2" >> /etc/fstab
+fi
+mountpoint -q "$MOUNT_POINT" || mount "$MOUNT_POINT"
+mkdir -p "$MOUNT_POINT/data"
+
+ADMIN_PASSWORD="$(aws ssm get-parameter \
+  --name "$SECRET_NAME" \
+  --with-decryption \
+  --region "$REGION" \
+  --query 'Parameter.Value' \
+  --output text)"
+
+# Passed via env file rather than `docker run -e` so it never shows up in `ps`.
+umask 077
+cat > "$ENV_FILE" <<EOF
+POSTGRES_USER=$ADMIN_USER
+POSTGRES_PASSWORD=$ADMIN_PASSWORD
+PGDATA=/var/lib/postgresql/data/pgdata
+EOF
+unset ADMIN_PASSWORD
+
+docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  --restart unless-stopped \
+  --env-file "$ENV_FILE" \
+  -p "$POSTGRES_PORT":5432 \
+  -v "$MOUNT_POINT/data":/var/lib/postgresql/data \
+  "$POSTGRES_IMAGE"

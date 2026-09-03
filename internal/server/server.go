@@ -9,6 +9,7 @@ import (
 
 	"github.com/AshishDevashi/GIDP/internal/config"
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
+	"github.com/AshishDevashi/GIDP/internal/modules/dbinstance"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
 	"github.com/AshishDevashi/GIDP/internal/modules/registry"
@@ -67,7 +68,34 @@ func (s *Server) registerModules() {
 	team.NewModule(s.db).RegisterRoutes(protected)
 	repo.NewModule(s.db, s.cfg.GitHubToken).RegisterRoutes(protected)
 	registry.NewModule(s.db, s.cfg.DockerHubUsername, s.cfg.DockerHubToken, s.cfg.DockerHubNamespace).RegisterRoutes(protected)
+	dbinstance.NewModule(s.db, s.dbInstanceConfig(), s.log).RegisterRoutes(protected)
 	lookup.NewModule(s.db).RegisterRoutes(protected)
+}
+
+func (s *Server) dbInstanceConfig() dbinstance.Config {
+	return dbinstance.Config{
+		Region:              s.cfg.AWSRegion,
+		InstanceType:        s.cfg.DBInstanceType,
+		AMISSMParameter:     s.cfg.DBInstanceAMISSMParameter,
+		Engine:              "postgres",
+		EngineVersion:       s.cfg.DBInstanceEngineVersion,
+		StorageGB:           s.cfg.DBInstanceStorageGB,
+		RootVolumeGB:        s.cfg.DBInstanceRootVolumeGB,
+		PostgresPort:        s.cfg.DBInstancePostgresPort,
+		PostgresImage:       s.cfg.DBInstancePostgresImage,
+		AdminUsername:       s.cfg.DBInstanceAdminUsername,
+		ContainerName:       s.cfg.DBInstanceContainerName,
+		DataDeviceName:      s.cfg.DBInstanceDataDeviceName,
+		DataMountPoint:      s.cfg.DBInstanceDataMountPoint,
+		SSHIngressCIDR:      s.cfg.DBInstanceSSHIngressCIDR,
+		PostgresIngressCIDR: s.cfg.DBInstancePostgresIngressCIDR,
+		ModuleDir:           s.cfg.TerraformModuleDir,
+		WorkDir:             s.cfg.TerraformWorkDir,
+		KeyDir:              s.cfg.SSHKeyDir,
+		TerraformBinPath:    s.cfg.TerraformBinPath,
+		ProvisionTimeout:    s.cfg.DBInstanceProvisionTimeout,
+		ReadinessTimeout:    s.cfg.DBInstanceReadinessTimeout,
+	}
 }
 
 // Router exposes the underlying gin engine, e.g. for route introspection tooling.

@@ -8,6 +8,37 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DbInstance struct {
+	ID                 pgtype.UUID        `json:"id"`
+	Name               string             `json:"name"`
+	Description        string             `json:"description"`
+	Engine             string             `json:"engine"`
+	EngineVersion      string             `json:"engine_version"`
+	Provider           string             `json:"provider"`
+	Region             string             `json:"region"`
+	InstanceType       string             `json:"instance_type"`
+	StorageGb          int32              `json:"storage_gb"`
+	Status             string             `json:"status"`
+	ContainerStatus    string             `json:"container_status"`
+	StatusMessage      pgtype.Text        `json:"status_message"`
+	Workspace          string             `json:"workspace"`
+	SshKeyName         string             `json:"ssh_key_name"`
+	ProviderInstanceID pgtype.Text        `json:"provider_instance_id"`
+	AvailabilityZone   pgtype.Text        `json:"availability_zone"`
+	PublicIp           pgtype.Text        `json:"public_ip"`
+	PrivateIp          pgtype.Text        `json:"private_ip"`
+	SecurityGroupID    pgtype.Text        `json:"security_group_id"`
+	VolumeID           pgtype.Text        `json:"volume_id"`
+	CreatedBy          pgtype.UUID        `json:"created_by"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `json:"deleted_at"`
+	AdminUsername      string             `json:"admin_username"`
+	AdminSecretName    string             `json:"admin_secret_name"`
+	PostgresPort       int32              `json:"postgres_port"`
+	PostgresImage      string             `json:"postgres_image"`
+}
+
 type Language struct {
 	ID    int16       `json:"id"`
 	Code  string      `json:"code"`

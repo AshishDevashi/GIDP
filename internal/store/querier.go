@@ -13,6 +13,8 @@ import (
 type Querier interface {
 	ActivateRepo(ctx context.Context, arg ActivateRepoParams) (Repo, error)
 	AddTeamMember(ctx context.Context, arg AddTeamMemberParams) (TeamMember, error)
+	CountActiveDBInstances(ctx context.Context) (int64, error)
+	CreateDBInstance(ctx context.Context, arg CreateDBInstanceParams) (DbInstance, error)
 	CreateRegistry(ctx context.Context, arg CreateRegistryParams) (Registry, error)
 	CreateRepo(ctx context.Context, arg CreateRepoParams) (Repo, error)
 	CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error)
@@ -21,6 +23,8 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	FailRepo(ctx context.Context, arg FailRepoParams) (Repo, error)
 	GetActiveTeamMember(ctx context.Context, arg GetActiveTeamMemberParams) (TeamMember, error)
+	GetDBInstanceByID(ctx context.Context, id pgtype.UUID) (DbInstance, error)
+	GetDBInstanceByName(ctx context.Context, name string) (DbInstance, error)
 	GetRegistryByID(ctx context.Context, id pgtype.UUID) (Registry, error)
 	GetRegistryByName(ctx context.Context, arg GetRegistryByNameParams) (Registry, error)
 	GetRepoByID(ctx context.Context, id pgtype.UUID) (Repo, error)
@@ -31,6 +35,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	ListDBInstances(ctx context.Context) ([]DbInstance, error)
 	ListLanguages(ctx context.Context) ([]Language, error)
 	ListRegistries(ctx context.Context) ([]Registry, error)
 	ListRegistryProviders(ctx context.Context) ([]RegistryProvider, error)
@@ -40,8 +45,12 @@ type Querier interface {
 	ListTeamMembers(ctx context.Context, teamID pgtype.UUID) ([]TeamMember, error)
 	ListTeams(ctx context.Context) ([]Team, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	MarkDBInstanceContainerStatus(ctx context.Context, arg MarkDBInstanceContainerStatusParams) (int64, error)
+	MarkDBInstanceProvisioned(ctx context.Context, arg MarkDBInstanceProvisionedParams) (DbInstance, error)
+	MarkDBInstanceStatus(ctx context.Context, arg MarkDBInstanceStatusParams) (int64, error)
 	MarkRepoCreating(ctx context.Context, id pgtype.UUID) (Repo, error)
 	RemoveTeamMember(ctx context.Context, id pgtype.UUID) error
+	SoftDeleteDBInstance(ctx context.Context, id pgtype.UUID) (int64, error)
 	SoftDeleteRegistry(ctx context.Context, id pgtype.UUID) (int64, error)
 	UpdateLastLogin(ctx context.Context, id pgtype.UUID) error
 	UpdateRegistry(ctx context.Context, arg UpdateRegistryParams) (Registry, error)
