@@ -36,3 +36,6 @@ deploy/terraform/.workspaces/
 
 # Generated SSH key pairs for provisioned instances
 deploy/keys/
+
+# Captured kubeconfigs for provisioned deployment instances
+deploy/credentials/

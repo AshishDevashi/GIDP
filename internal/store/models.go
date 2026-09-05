@@ -39,6 +39,60 @@ type DbInstance struct {
 	PostgresImage      string             `json:"postgres_image"`
 }
 
+type Deployment struct {
+	ID                   pgtype.UUID        `json:"id"`
+	DeploymentInstanceID pgtype.UUID        `json:"deployment_instance_id"`
+	RepoID               pgtype.UUID        `json:"repo_id"`
+	RegistryID           pgtype.UUID        `json:"registry_id"`
+	ImageName            string             `json:"image_name"`
+	ImageTag             string             `json:"image_tag"`
+	Name                 string             `json:"name"`
+	Namespace            string             `json:"namespace"`
+	Replicas             int32              `json:"replicas"`
+	Resources            []byte             `json:"resources"`
+	EnvVars              []byte             `json:"env_vars"`
+	SecretRefs           []byte             `json:"secret_refs"`
+	Expose               []byte             `json:"expose"`
+	Status               string             `json:"status"`
+	CurrentRevision      int32              `json:"current_revision"`
+	K8sDeploymentName    pgtype.Text        `json:"k8s_deployment_name"`
+	LastError            pgtype.Text        `json:"last_error"`
+	CreatedBy            pgtype.UUID        `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Deploymentinstance struct {
+	ID              pgtype.UUID        `json:"id"`
+	Name            string             `json:"name"`
+	Ec2InstanceID   pgtype.Text        `json:"ec2_instance_id"`
+	PublicIp        pgtype.Text        `json:"public_ip"`
+	PrivateIp       pgtype.Text        `json:"private_ip"`
+	ApiServerUrl    pgtype.Text        `json:"api_server_url"`
+	AuthType        string             `json:"auth_type"`
+	CredentialsRef  pgtype.Text        `json:"credentials_ref"`
+	MaxDeployments  int32              `json:"max_deployments"`
+	Status          string             `json:"status"`
+	LastError       pgtype.Text        `json:"last_error"`
+	Workspace       string             `json:"workspace"`
+	SshKeyName      string             `json:"ssh_key_name"`
+	SecurityGroupID pgtype.Text        `json:"security_group_id"`
+	CreatedBy       pgtype.UUID        `json:"created_by"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Deploymentrevision struct {
+	ID             pgtype.UUID        `json:"id"`
+	DeploymentID   pgtype.UUID        `json:"deployment_id"`
+	RevisionNo     int32              `json:"revision_no"`
+	ImageTag       string             `json:"image_tag"`
+	ConfigSnapshot []byte             `json:"config_snapshot"`
+	Status         string             `json:"status"`
+	TriggeredBy    pgtype.UUID        `json:"triggered_by"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
 type Language struct {
 	ID    int16       `json:"id"`
 	Code  string      `json:"code"`

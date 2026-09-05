@@ -11,6 +11,8 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
 	"github.com/AshishDevashi/GIDP/internal/modules/databases"
 	"github.com/AshishDevashi/GIDP/internal/modules/dbinstance"
+	"github.com/AshishDevashi/GIDP/internal/modules/deployment"
+	"github.com/AshishDevashi/GIDP/internal/modules/deploymentinstance"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
 	"github.com/AshishDevashi/GIDP/internal/modules/registry"
@@ -73,6 +75,21 @@ func (s *Server) registerModules() {
 
 	dbInstanceModule := dbinstance.NewModule(s.db, s.dbInstanceConfig(), s.log)
 	dbInstanceModule.RegisterRoutes(protected)
+	deploymentInstanceModule := deploymentinstance.NewModule(s.db, s.deploymentInstanceConfig(), s.log)
+	deploymentInstanceModule.RegisterRoutes(protected)
+
+	deploymentModule := deployment.NewModule(s.db, s.log)
+	deploymentModule.RegisterRoutes(protected)
+	deploymentInstanceModule.Service().SetDeleteGuard(func(ctx context.Context, inst store.Deploymentinstance) error {
+		active, err := deploymentModule.Service().CountActiveByInstanceID(ctx, inst.ID)
+		if err != nil {
+			return err
+		}
+		if active > 0 {
+			return deploymentinstance.ErrActiveDeployments
+		}
+		return nil
+	})
 
 	databasesModule := databases.NewModule(s.db, s.log)
 	databasesModule.RegisterRoutes(protected)
@@ -116,6 +133,28 @@ func (s *Server) dbInstanceConfig() dbinstance.Config {
 		TerraformBinPath:    s.cfg.TerraformBinPath,
 		ProvisionTimeout:    s.cfg.DBInstanceProvisionTimeout,
 		ReadinessTimeout:    s.cfg.DBInstanceReadinessTimeout,
+	}
+}
+
+func (s *Server) deploymentInstanceConfig() deploymentinstance.Config {
+	return deploymentinstance.Config{
+		Region:             s.cfg.AWSRegion,
+		InstanceType:       s.cfg.DeploymentInstanceType,
+		AMISSMParameter:    s.cfg.DeploymentInstanceAMISSMParameter,
+		RootVolumeGB:       s.cfg.DeploymentInstanceRootVolumeGB,
+		SSHIngressCIDR:     s.cfg.DeploymentInstanceSSHIngressCIDR,
+		KubeAPIIngressCIDR: s.cfg.DeploymentInstanceKubeAPIIngressCIDR,
+		HTTPIngressCIDR:    s.cfg.DeploymentInstanceHTTPIngressCIDR,
+		HTTPSIngressCIDR:   s.cfg.DeploymentInstanceHTTPSIngressCIDR,
+		ModuleDir:          s.cfg.DeploymentInstanceTerraformModuleDir,
+		WorkDir:            s.cfg.TerraformWorkDir,
+		KeyDir:             s.cfg.SSHKeyDir,
+		CredentialsDir:     s.cfg.DeploymentInstanceCredentialsDir,
+		SSHUser:            s.cfg.DeploymentInstanceSSHUser,
+		TerraformBinPath:   s.cfg.TerraformBinPath,
+		ProvisionTimeout:   s.cfg.DeploymentInstanceProvisionTimeout,
+		ReadinessTimeout:   s.cfg.DeploymentInstanceReadinessTimeout,
+		MaxDeployments:     s.cfg.DeploymentInstanceMaxDeployments,
 	}
 }
 
