@@ -34,6 +34,11 @@ func NewModule(pool *pgxpool.Pool, cfg Config, log *slog.Logger) *Module {
 	return &Module{service: NewService(repo, prov, cfg, log)}
 }
 
+// Service returns the underlying service instance.
+func (m *Module) Service() *Service {
+	return m.service
+}
+
 func (m *Module) RegisterRoutes(rg *gin.RouterGroup) {
 	instances := rg.Group("/db-instances")
 	instances.POST("", m.create)

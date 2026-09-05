@@ -45,6 +45,21 @@ type Language struct {
 	Label pgtype.Text `json:"label"`
 }
 
+type ManagedDatabase struct {
+	ID               pgtype.UUID        `json:"id"`
+	DbInstanceID     pgtype.UUID        `json:"db_instance_id"`
+	Name             string             `json:"name"`
+	Username         string             `json:"username"`
+	Password         string             `json:"password"`
+	AllocatedMb      int32              `json:"allocated_mb"`
+	Status           string             `json:"status"`
+	ConnectionString string             `json:"connection_string"`
+	CreatedBy        pgtype.UUID        `json:"created_by"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type Registry struct {
 	ID          pgtype.UUID        `json:"id"`
 	Name        string             `json:"name"`

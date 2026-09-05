@@ -72,14 +72,20 @@ type Config struct {
 }
 
 type Service struct {
-	repo        *Repository
-	provisioner *provisioner
-	cfg         Config
-	log         *slog.Logger
+	repo         *Repository
+	provisioner  *provisioner
+	cfg          Config
+	log          *slog.Logger
+	teardownHook func(ctx context.Context, instance store.DbInstance) error
 }
 
 func NewService(repo *Repository, prov *provisioner, cfg Config, log *slog.Logger) *Service {
 	return &Service{repo: repo, provisioner: prov, cfg: cfg, log: log}
+}
+
+// SetTeardownHook registers a callback executed before instance infrastructure is destroyed.
+func (s *Service) SetTeardownHook(hook func(ctx context.Context, instance store.DbInstance) error) {
+	s.teardownHook = hook
 }
 
 // Create registers the single DB instance and provisions its EC2 host in the
@@ -316,6 +322,12 @@ func (s *Service) destroyAsync(instance store.DbInstance) {
 	defer cancel()
 
 	id := uuidutil.String(instance.ID)
+
+	if s.teardownHook != nil {
+		if hookErr := s.teardownHook(ctx, instance); hookErr != nil {
+			s.log.Warn("db instance teardown hook failed", "id", id, "error", hookErr)
+		}
+	}
 
 	if err := s.provisioner.destroy(ctx, instance.Workspace); err != nil {
 		s.log.Error("db instance teardown failed", "id", id, "error", err)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/AshishDevashi/GIDP/internal/config"
 	"github.com/AshishDevashi/GIDP/internal/modules/auth"
+	"github.com/AshishDevashi/GIDP/internal/modules/databases"
 	"github.com/AshishDevashi/GIDP/internal/modules/dbinstance"
 	"github.com/AshishDevashi/GIDP/internal/modules/health"
 	"github.com/AshishDevashi/GIDP/internal/modules/lookup"
@@ -16,6 +17,7 @@ import (
 	"github.com/AshishDevashi/GIDP/internal/modules/repo"
 	"github.com/AshishDevashi/GIDP/internal/modules/team"
 	"github.com/AshishDevashi/GIDP/internal/modules/user"
+	"github.com/AshishDevashi/GIDP/internal/store"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -68,7 +70,26 @@ func (s *Server) registerModules() {
 	team.NewModule(s.db).RegisterRoutes(protected)
 	repo.NewModule(s.db, s.cfg.GitHubToken).RegisterRoutes(protected)
 	registry.NewModule(s.db, s.cfg.DockerHubUsername, s.cfg.DockerHubToken, s.cfg.DockerHubNamespace).RegisterRoutes(protected)
-	dbinstance.NewModule(s.db, s.dbInstanceConfig(), s.log).RegisterRoutes(protected)
+
+	dbInstanceModule := dbinstance.NewModule(s.db, s.dbInstanceConfig(), s.log)
+	dbInstanceModule.RegisterRoutes(protected)
+
+	databasesModule := databases.NewModule(s.db, s.log)
+	databasesModule.RegisterRoutes(protected)
+
+	// Wire cascade teardown hook so databases are dropped and metadata cleaned when instance is destroyed.
+	dbInstanceModule.Service().SetTeardownHook(func(ctx context.Context, inst store.DbInstance) error {
+		host := inst.PublicIp.String
+		if host == "" {
+			host = inst.PrivateIp.String
+		}
+		adminPass := ""
+		if inst.AdminSecretName != "" {
+			adminPass, _ = databases.NewSecretResolver().Resolve(ctx, inst.Region, inst.AdminSecretName)
+		}
+		return databasesModule.Service().TeardownInstanceDatabases(ctx, inst.ID, host, inst.PostgresPort, inst.AdminUsername, adminPass)
+	})
+
 	lookup.NewModule(s.db).RegisterRoutes(protected)
 }
 
